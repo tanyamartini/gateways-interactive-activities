@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assigning Participants to Groups — A Methods Activity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d12;
+    --bg-elev: #131820;
+    --bg-elev-2: #1a2029;
+    --border: #232a36;
+    --border-bright: #2f3845;
+    --text: #f1ece1;
+    --text-muted: #8a8f99;
+    --text-faint: #565b66;
+    --treatment: #7ed957;
+    --control: #5b9eff;
+    --warn: #ffb84d;
+    --truth: #d4a4ff;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+    --mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 230, 180, 0.04), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 90%, rgba(91, 158, 255, 0.04), transparent);
+    background-attachment: fixed;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 60px 32px 100px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(36px, 5vw, 54px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 40px;
+  }
+
+  h1 em { font-style: italic; color: var(--text-muted); }
+
+  p.body {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 720px;
+    margin-bottom: 20px;
+  }
+
+  p.body strong { color: var(--text); font-weight: 500; }
+  p.body em { color: var(--text); font-style: italic; }
+
+  /* Background section heading */
+  h2.subhead {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+    margin: 40px 0 18px;
+  }
+
+  /* Run-Study / Look-Under-the-Hood imperative line, given a touch of emphasis */
+  p.instruction {
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 720px;
+    margin: 28px 0 20px;
+    padding-left: 14px;
+    border-left: 2px solid var(--border-bright);
+  }
+
+  /* ---- Reveal-button blocks (IV / DV, Show an example) ---- */
+  .reveal-group {
+    margin: 8px 0 28px;
+    max-width: 720px;
+  }
+
+  .reveal-group.iv-dv {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .reveal-btn {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-bright);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 12px 20px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reveal-btn::before {
+    content: '+';
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text-faint);
+    transition: transform 0.2s ease;
+    display: inline-block;
+  }
+
+  .reveal-btn.open::before {
+    content: '−';
+    color: var(--text);
+  }
+
+  .reveal-btn:hover {
+    background: var(--bg-elev-2);
+    border-color: var(--text-faint);
+  }
+
+  .reveal-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, margin-top 0.3s ease;
+    margin-top: 0;
+  }
+
+  .reveal-content.show {
+    max-height: 1200px;
+    margin-top: 14px;
+  }
+
+  .reveal-content-inner {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--truth);
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+
+  .reveal-content-inner p {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .reveal-content-inner p + p { margin-top: 12px; }
+
+  .reveal-content-inner strong { color: var(--text); font-weight: 500; }
+
+  /* ---- Method sections ---- */
+  .method-section {
+    margin: 64px 0 24px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .method-header {
+    margin-bottom: 24px;
+  }
+
+  .method-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+
+  .method-section h2.method-title {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 36px;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---- Reflection block ---- */
+  .reflection-section {
+    margin: 56px 0 24px;
+  }
+
+  .reflection-section .reflection-prompt {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin: 28px 0 8px;
+    max-width: 720px;
+  }
+
+  .reflection-section .reflection-prompt p {
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    font-family: var(--serif);
+    font-style: italic;
+  }
+
+  /* ---- Widget ---- */
+  .widget {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin: 12px 0 28px;
+  }
+
+  .widget .controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+
+  .btn:hover { opacity: 0.85; }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--truth);
+    border: 1px solid var(--truth);
+  }
+
+  .btn-secondary:hover { background: rgba(212, 164, 255, 0.1); }
+
+  .run-counter {
+    margin-left: auto;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+  }
+
+  .group-card {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 22px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .group-card.treatment { border-top: 3px solid var(--treatment); }
+  .group-card.control   { border-top: 3px solid var(--control); }
+
+  .group-card .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+
+  .group-card.treatment .label-color { color: var(--treatment); }
+  .group-card.control   .label-color { color: var(--control); }
+
+  .group-card .grade {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .group-card .unit {
+    font-family: var(--sans);
+    font-size: 16px;
+    color: var(--text-faint);
+    font-weight: 400;
+    margin-left: 2px;
+  }
+
+  .group-card .ngroup {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+
+  .summary {
+    background: var(--bg-elev-2);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+  }
+
+  .summary-row {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 6px 0;
+  }
+
+  .summary-row .lab {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    width: 200px;
+    flex-shrink: 0;
+  }
+
+  .summary-row .val {
+    font-family: var(--serif);
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+
+  .summary-row .delta {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-left: 10px;
+    letter-spacing: 0.05em;
+  }
+
+  .summary-row.truth .val { color: var(--truth); }
+
+  .interpretation {
+    margin-top: 12px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .interpretation:empty { display: none; }
+
+  .gap-warning {
+    color: var(--warn);
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: var(--sans);
+  }
+
+  .gap-good {
+    color: var(--treatment);
+    font-size: 14px;
+    line-height: 1.5;
+    font-family: var(--sans);
+  }
+
+  /* ---- Reveal panel (hidden variables) ---- */
+  .reveal-panel {
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .reveal-panel.show { display: block; }
+
+  .reveal-panel h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+  }
+
+  .reveal-panel .reveal-sub {
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+
+  .hidden-vars-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.6fr;
+    gap: 12px 16px;
+    align-items: center;
+  }
+
+  .header-cell {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .var-name {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .var-sub {
+    display: block;
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+
+  .var-val {
+    font-family: var(--mono);
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .var-val.t { color: var(--treatment); }
+  .var-val.c { color: var(--control); }
+
+  .var-diff {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .var-diff.balanced {
+    background: rgba(126, 217, 87, 0.1);
+    color: var(--treatment);
+  }
+
+  .var-diff.imbalanced {
+    background: rgba(255, 184, 77, 0.1);
+    color: var(--warn);
+  }
+
+  .var-diff.severe {
+    background: rgba(255, 107, 107, 0.12);
+    color: #ff8a8a;
+  }
+
+  /* ---- History track ---- */
+  .history {
+    margin-top: 6px;
+  }
+
+  .history h3 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 14px;
+    letter-spacing: -0.01em;
+    color: var(--text-muted);
+  }
+
+  .history h3 .hint {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    font-weight: 400;
+    margin-left: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .history-track {
+    position: relative;
+    height: 110px;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  .history-empty {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--text-faint);
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  .history-labels {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+  }
+
+  .history-labels > div {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-faint);
+    left: 12px;
+  }
+
+  .history-truth-line {
+    position: absolute;
+    height: 1px;
+    background: var(--truth);
+    opacity: 0.4;
+  }
+
+  .history-zero-line {
+    position: absolute;
+    height: 1px;
+    background: var(--text-faint);
+    opacity: 0.25;
+    border-top: 1px dashed currentColor;
+    background: transparent;
+  }
+
+  .history-tick {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Concluding note */
+  p.conclusion {
+    color: var(--text);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    line-height: 1.55;
+    max-width: 720px;
+    margin: 32px 0;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  p.note {
+    color: var(--text-faint);
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 720px;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    font-family: var(--mono);
+  }
+
+  p.note em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 760px) {
+    .container { padding: 40px 20px 60px; }
+    .widget, .reveal-panel { padding: 22px; }
+    .results { grid-template-columns: 1fr; }
+    .hidden-vars-grid { grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+    .hidden-vars-grid .var-name { grid-column: 1 / -1; }
+    .summary-row { flex-direction: column; gap: 4px; }
+    .summary-row .lab { width: auto; }
+    .reveal-group.iv-dv { flex-direction: column; }
+    .reveal-group.iv-dv .reveal-btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow">Foundations of Psychological Science · Section 1.6</div>
+  <h1>Does it matter how we assign participants to groups in an experiment?</h1>
+
+  <!-- ===== Intro ===== -->
+  <p class="body">
+    This activity focuses on some key concepts related to experimental research, which is
+    described in Section 1.6.
+  </p>
+  <p class="body">
+    One of the key advantages of true experiments is their ability to help us establish
+    cause-and-effect relationships between variables.
+  </p>
+
+  <h2 class="subhead">Background to the Activity</h2>
+
+  <p class="body">
+    There are a lot of stories in the news these days about the potential effects of young
+    people's engagement with social media. In particular, several stories have reported on
+    whether excessive use of social media can result in poorer academic performance. This
+    seems like a reasonable concern, given that young people currently spend an average of
+    5 hours each day on social media sites such as Instagram and TikTok.
+  </p>
+
+  <p class="body">
+    Imagine that Professor Anna Lyze is teaching a large psychology course and wants to run a
+    study to test the hypothesis that reducing students' use of social media to 30 minutes
+    per day for 7 days before an exam will cause an improvement in academic performance,
+    as measured by their test scores on that exam.
+  </p>
+
+  <!-- ===== IV / DV ===== -->
+  <p class="body">
+    Let's start with the basics: After reviewing Section 1.6, identify the independent and
+    dependent variables in this experiment.
+  </p>
+
+  <div class="reveal-group iv-dv">
+    <button class="reveal-btn" data-reveal="iv">Independent variable</button>
+    <button class="reveal-btn" data-reveal="dv">Dependent variable</button>
+  </div>
+
+  <div class="reveal-content" id="reveal-iv">
+    <div class="reveal-content-inner">
+      <p>
+        The <strong>independent variable</strong> (IV) is the amount of social media exposure
+        (either limited to 30 minutes per day or unlimited). In a true experiment, we're examining
+        potential cause-and-effect relationships between variables (reducing social media will
+        cause an improvement in academic performance), and the independent measure is the
+        variable that is assumed to be the "cause".
+      </p>
+    </div>
+  </div>
+
+  <div class="reveal-content" id="reveal-dv">
+    <div class="reveal-content-inner">
+      <p>
+        The <strong>dependent variable</strong> (DV) is academic performance. Remember that in
+        a true experiment, we're examining potential cause-and-effect relationships between
+        variables. The dependent measure is the "effect", and its name is appropriate because
+        it's thought to "depend on" the independent variable.
+      </p>
+    </div>
+  </div>
+
+  <!-- ===== Study setup ===== -->
+  <p class="body">
+    For this study, Professor Anna Lyze will compare two groups. The experimental group
+    ("limited social media" group) will agree to limit their engagement with social media to
+    a maximum of 30 minutes per day for 7 days prior to the midterm exam. The control group
+    ("unlimited social media" group) will not have any restrictions placed on their use of
+    social media before the exam. After the grading is complete, the professor will compare
+    the exam grades of students in the experimental and control groups.
+  </p>
+
+  <p class="body">
+    Two hundred students from the class are recruited to take part in the study. How do we
+    decide who goes in which group? The answer to that question matters more than you might
+    think.
+  </p>
+
+  <!-- ===== METHOD 1: SELF-SELECTION ===== -->
+  <section class="method-section">
+    <div class="method-header">
+      <div class="method-num">METHOD 01</div>
+      <h2 class="method-title">Self-selection</h2>
+    </div>
+
+    <p class="body">
+      Probably one of the simplest ways to allocate participants to groups would be to
+      announce the study and assign the first 100 people who sign up to the experimental
+      group — these are the people who would agree to reduce their social media usage to a
+      maximum of 30 minutes per day in the 7 days leading up to the exam. The last 100
+      people to sign up become the control group.
+      Researchers call this process of assigning people to groups <strong>self-selection</strong>,
+      even though students aren't literally selecting their group. Instead, it's their
+      behaviour — how quickly they sign up — that decides which group they end up in. In this
+      way, participants' own actions are responsible for which group they're "selected" to
+      be a part of. (Self-selection can also apply in other situations; for example, a study
+      in which researchers were testing a program for older adults and put all of the people
+      from one retirement home in the experimental group and all of the people from another
+      retirement home in the control group.)
+    </p>
+
+    <p class="body">
+      To see what happens in the study when we use self-selection to assign participants to
+      groups, we're going to run a simulation of what the data would look like in this
+      situation. Because this is a simulation, we have the advantage of controlling (and
+      therefore knowing) something a real researcher never could: the true effect of limiting
+      social media engagement on students' exam grades. Being able to control (and know) the
+      true effect allows us to check the extent to which the results of self-selecting into
+      groups would actually match reality. (In a real study, that true effect is the
+      unknowable thing we're trying to establish.)
+    </p>
+
+    <p class="body">
+      For this simulation of Dr. Lyze's study, we've set things up so that the true effect
+      of reducing social media consumption is an increase of 4% on the midterm grade. Put
+      another way, people who are in the "limited social media" (experimental) group will
+      score 4% higher than people in the "unlimited social media" (control) group.
+    </p>
+
+    <p class="instruction">
+      Click the <strong>"Run Study"</strong> button at least five times and note how the
+      results of the simulation compare to the true effect in each case.
+    </p>
+
+    <div class="widget" id="widget-self">
+      <div class="controls">
+        <button class="btn" data-action="run">Run Study</button>
+        <span class="run-counter">0 runs</span>
+      </div>
+      <div class="results">
+        <div class="group-card treatment">
+          <div class="label">Experimental group <span class="label-color">●</span></div>
+          <div class="grade"><span class="t-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="t-n">—</span> students · limited social media</div>
+        </div>
+        <div class="group-card control">
+          <div class="label">Control group <span class="label-color">●</span></div>
+          <div class="grade"><span class="c-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="c-n">—</span> students · unlimited social media</div>
+        </div>
+      </div>
+      <div class="summary">
+        <div class="summary-row observed">
+          <div class="lab">Observed effect of program</div>
+          <div class="val"><span class="observed-effect">—</span><span class="delta observed-delta"></span></div>
+        </div>
+        <div class="summary-row truth">
+          <div class="lab">True effect of program</div>
+          <div class="val">+4.0%</div>
+        </div>
+        <div class="interpretation"></div>
+      </div>
+      <div class="history">
+        <h3>Observed effect across runs <span class="hint">— each dot is one run of the study</span></h3>
+        <div class="history-track"><div class="history-empty">Run the study a few times to see the pattern.</div></div>
+      </div>
+    </div>
+
+    <p class="body">
+      The simulation makes it clear that self-selection continually provided results that
+      overestimated the size of the true effect (4%). In other words, the average exam mark
+      for the experimental group always exceeded the average mark for the control group by
+      much more than 4%. (It's worth noting that self-selection can also work in the opposite
+      way; that is, in other studies, self-selection may continually <em>underestimate</em>
+      the true effect.)
+    </p>
+
+    <p class="body">
+      The take-home message is that self-selection just isn't a good way to assign
+      participants to the experimental and control groups. But why not?
+    </p>
+  </section>
+
+  <!-- ===== REFLECTION: extraneous variables ===== -->
+  <section class="reflection-section">
+    <p class="body">
+      Let's think back to the self-selection process we used earlier to assign students to
+      conditions. We assigned the first 100 people who signed up to the experimental
+      (limited social media) condition, and the last 100 people to the control (unlimited
+      social media) condition. Do you think that there might be a difference between the
+      first 100 people who signed up for the study and the last 100 people?
+    </p>
+
+    <p class="body">
+      This question is getting at the issue of <strong>extraneous variables</strong>, which
+      are described in Section 1.6. Extraneous variables are variables <em>other than the
+      independent variable</em> (social media exposure) that may have an effect on the
+      dependent measure (grades).
+    </p>
+
+    <div class="reflection-prompt">
+      <p>
+        Thinking about Dr. Anna Lyze's study, try to think of some variables other than daily
+        time spent on social media (the independent variable) that might affect the students'
+        midterm grades (the dependent variable).
+      </p>
+    </div>
+
+    <div class="reveal-group">
+      <button class="reveal-btn" data-reveal="example">Show an example</button>
+    </div>
+
+    <div class="reveal-content" id="reveal-example">
+      <div class="reveal-content-inner">
+        <p>
+          Sometimes extraneous variables are associated with environmental conditions, but
+          they can also reflect characteristics of the participants. For example, you could
+          probably make a reasonable argument for the idea that <strong>academic
+          motivation</strong> may be an extraneous variable — a variable other than the
+          independent variable that could impact the dependent variable. More specifically,
+          perhaps the first 100 people who signed up for the study were a bit more "keen",
+          and academically motivated: When they saw a study aimed at potentially improving
+          their grades, they jumped at the chance to take part.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== METHOD 2: MATCHED GROUPS ===== -->
+  <section class="method-section">
+    <div class="method-header">
+      <div class="method-num">METHOD 02</div>
+      <h2 class="method-title">Matched groups</h2>
+    </div>
+
+    <p class="body">
+      In Section 1.6, we talk about the fact that we often want to control for extraneous
+      variables. To do this, we would need to measure them. In this case, we might have all
+      participants complete a self-reported <strong>academic motivation scale</strong> —
+      items like "I am driven to do well in my courses" and "I work hard at my studies."
+    </p>
+
+    <p class="body">
+      If we did this, we could try to address some of the problems with self-selection by
+      using a <em>matched groups</em> approach; that is, we put an equal number of high and
+      low motivation people in both the experimental and control groups, so that the average
+      level of motivation in each group is approximately equal. Put another way, we are going
+      to "control for" motivation. Here, the idea is to make the two groups more comparable
+      on the extraneous variable (academic motivation) before the study begins, since we
+      suspect it matters for the outcome. That way, if we see a grade difference at the end,
+      we can be more confident it's due to the independent variable (social media exposure),
+      rather than to one group being more motivated than the other from the start.
+    </p>
+
+    <p class="instruction">
+      Click the <strong>"Run Study"</strong> button at least five times and note how the
+      results of the simulation compare to the true effect in each case. Then click on the
+      <strong>"Look Under the Hood"</strong> button to see what's going on.
+    </p>
+
+    <div class="widget" id="widget-matched">
+      <div class="controls">
+        <button class="btn" data-action="run">Run Study</button>
+        <button class="btn btn-secondary" data-action="hood">Look Under the Hood</button>
+        <span class="run-counter">0 runs</span>
+      </div>
+      <div class="results">
+        <div class="group-card treatment">
+          <div class="label">Experimental group <span class="label-color">●</span></div>
+          <div class="grade"><span class="t-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="t-n">—</span> students · limited social media</div>
+        </div>
+        <div class="group-card control">
+          <div class="label">Control group <span class="label-color">●</span></div>
+          <div class="grade"><span class="c-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="c-n">—</span> students · unlimited social media</div>
+        </div>
+      </div>
+      <div class="summary">
+        <div class="summary-row observed">
+          <div class="lab">Observed effect of program</div>
+          <div class="val"><span class="observed-effect">—</span><span class="delta observed-delta"></span></div>
+        </div>
+        <div class="summary-row truth">
+          <div class="lab">True effect of program</div>
+          <div class="val">+4.0%</div>
+        </div>
+        <div class="interpretation"></div>
+      </div>
+
+      <div class="reveal-panel">
+        <h3>What were the two groups actually like?</h3>
+        <p class="reveal-sub">
+          Here are four additional underlying characteristics of our study participants,
+          over and above academic motivation (which we controlled for). Each one is actually
+          an extraneous variable that influences the dependent measure (test scores). Here
+          you can see the average score on these variables for both the experimental and
+          control groups, averaged across all your runs of this method
+          (<span class="hood-runs">0 runs so far</span>).
+        </p>
+        <div class="hidden-vars-grid">
+          <div class="header-cell">Variable</div>
+          <div class="header-cell">Experimental</div>
+          <div class="header-cell">Control</div>
+          <div class="header-cell">Difference</div>
+
+          <div class="var-name">Academic motivation
+            <span class="var-sub">We measured this using the motivation survey and tried to equalize it across groups.</span>
+          </div>
+          <div class="var-val t hv1-t">—</div>
+          <div class="var-val c hv1-c">—</div>
+          <div class="var-diff hv1-d">—</div>
+
+          <div class="var-name">Test anxiety
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv2-t">—</div>
+          <div class="var-val c hv2-c">—</div>
+          <div class="var-diff hv2-d">—</div>
+
+          <div class="var-name">Sleep habits
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv3-t">—</div>
+          <div class="var-val c hv3-c">—</div>
+          <div class="var-diff hv3-d">—</div>
+
+          <div class="var-name">Interest in the subject matter
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv4-t">—</div>
+          <div class="var-val c hv4-c">—</div>
+          <div class="var-diff hv4-d">—</div>
+
+          <div class="var-name">Hours worked at a part-time job
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv5-t">—</div>
+          <div class="var-val c hv5-c">—</div>
+          <div class="var-diff hv5-d">—</div>
+        </div>
+      </div>
+
+      <div class="history">
+        <h3>Observed effect across runs <span class="hint">— each dot is one run of the study</span></h3>
+        <div class="history-track"><div class="history-empty">Run the study a few times to see the pattern.</div></div>
+      </div>
+    </div>
+
+    <p class="body">
+      That second simulation demonstrates that when we control one extraneous variable
+      (academic motivation), our results come a bit closer to the true effect of the
+      independent variable. When you look under the hood, though, you'll see why the results
+      still don't reflect the true effect of limiting social media on test grades: Though
+      you have controlled one extraneous variable, there are still others that you didn't
+      think to measure, and that are affecting your results.
+    </p>
+  </section>
+
+  <!-- ===== METHOD 3: RANDOM ASSIGNMENT ===== -->
+  <section class="method-section">
+    <div class="method-header">
+      <div class="method-num">METHOD 03</div>
+      <h2 class="method-title">Random assignment</h2>
+    </div>
+
+    <p class="body">
+      Because it's almost impossible to know all of the possible extraneous variables that
+      might influence your results, the best way to assign people to groups is to use
+      <em>random assignment</em> — flip a coin for each participant: heads you're in the
+      experimental group, tails you're in the control group. Here, we're not relying on
+      students' behavior or characteristics to decide who goes in which group; we're letting
+      chance do the work. Any differences between the groups should be due to chance alone.
+      More importantly, the laws of probability suggest that if you have a large number of
+      participants and you use chance to determine assignment to groups, the difference in
+      the average scores for the experimental and control groups should be very small for
+      all extraneous variables (i.e., the difference in the average level of test anxiety
+      or interest in the subject should be very small between the experimental and control
+      groups).
+    </p>
+
+    <p class="instruction">
+      To see how well random assignment works, click the <strong>"Run Study"</strong> button
+      at least five times and note how the results of the simulation compare to the true
+      effect in each case. Then click on the <strong>"Look Under the Hood"</strong> button to
+      see what random assignment does for a variety of potential extraneous measures
+      (including some that you probably wouldn't have thought to measure).
+    </p>
+
+    <div class="widget" id="widget-random">
+      <div class="controls">
+        <button class="btn" data-action="run">Run Study</button>
+        <button class="btn btn-secondary" data-action="hood">Look Under the Hood</button>
+        <span class="run-counter">0 runs</span>
+      </div>
+      <div class="results">
+        <div class="group-card treatment">
+          <div class="label">Experimental group <span class="label-color">●</span></div>
+          <div class="grade"><span class="t-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="t-n">—</span> students · limited social media</div>
+        </div>
+        <div class="group-card control">
+          <div class="label">Control group <span class="label-color">●</span></div>
+          <div class="grade"><span class="c-grade">—</span><span class="unit">%</span></div>
+          <div class="ngroup"><span class="c-n">—</span> students · unlimited social media</div>
+        </div>
+      </div>
+      <div class="summary">
+        <div class="summary-row observed">
+          <div class="lab">Observed effect of program</div>
+          <div class="val"><span class="observed-effect">—</span><span class="delta observed-delta"></span></div>
+        </div>
+        <div class="summary-row truth">
+          <div class="lab">True effect of program</div>
+          <div class="val">+4.0%</div>
+        </div>
+        <div class="interpretation"></div>
+      </div>
+
+      <div class="reveal-panel">
+        <h3>What were the two groups actually like?</h3>
+        <p class="reveal-sub">
+          Same hidden variables as before, averaged across all your runs of this method
+          (<span class="hood-runs">0 runs so far</span>). Notice that random assignment
+          balances <em>all</em> of them — the extraneous variable we measured, as well as
+          the ones we never thought to consider. The more times you run the study, the
+          closer the group averages get to each other.
+        </p>
+        <div class="hidden-vars-grid">
+          <div class="header-cell">Variable</div>
+          <div class="header-cell">Experimental</div>
+          <div class="header-cell">Control</div>
+          <div class="header-cell">Difference</div>
+
+          <div class="var-name">Academic motivation
+            <span class="var-sub">We measured this using the motivation survey.</span>
+          </div>
+          <div class="var-val t hv1-t">—</div>
+          <div class="var-val c hv1-c">—</div>
+          <div class="var-diff hv1-d">—</div>
+
+          <div class="var-name">Test anxiety
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv2-t">—</div>
+          <div class="var-val c hv2-c">—</div>
+          <div class="var-diff hv2-d">—</div>
+
+          <div class="var-name">Sleep habits
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv3-t">—</div>
+          <div class="var-val c hv3-c">—</div>
+          <div class="var-diff hv3-d">—</div>
+
+          <div class="var-name">Interest in the subject matter
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv4-t">—</div>
+          <div class="var-val c hv4-c">—</div>
+          <div class="var-diff hv4-d">—</div>
+
+          <div class="var-name">Hours worked at a part-time job
+            <span class="var-sub">We never thought to measure this.</span>
+          </div>
+          <div class="var-val t hv5-t">—</div>
+          <div class="var-val c hv5-c">—</div>
+          <div class="var-diff hv5-d">—</div>
+        </div>
+      </div>
+
+      <div class="history">
+        <h3>Observed effect across runs <span class="hint">— each dot is one run of the study</span></h3>
+        <div class="history-track"><div class="history-empty">Run the study a few times to see the pattern.</div></div>
+      </div>
+    </div>
+
+    <p class="conclusion">
+      Same study, same students, same question — but three different ways of assigning people
+      to groups. Only random assignment, though, will provide you with the best chance of
+      uncovering the true effect of the independent variable on the dependent variable. Why?
+      Because random assignment provides the best alternative for ensuring that the two
+      groups are as similar as possible across all of the potential extraneous variables
+      that might impact the dependent measure. When that's the case, the only difference
+      between the groups should be the independent variable (that is, whether or not they
+      have limited their social media exposure). If we find a difference between the groups
+      on the dependent measure (grades), then, we can be reasonably confident that it was
+      the independent variable that caused it.
+    </p>
+  </section>
+
+</div>
+
+<script>
+  // ===== Simulation engine =====
+  const N = 200;
+  const TRUE_EFFECT = 4.0;
+
+  function randn() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  function makePopulation() {
+    const pop = [];
+    for (let i = 0; i < N; i++) {
+      const motivation = randn();
+      const anxiety    = randn();
+      const sleep      = randn();
+      const interest   = randn();
+      const work       = randn();
+      // Keen students sign up early. Motivation dominates, with meaningful contributions
+      // from anxiety, interest, sleep, and part-time work hours — that way, after matching
+      // on the motivation survey, those other variables remain notably imbalanced.
+      const eagerness  = motivation * 1.0
+                       - anxiety    * 0.20
+                       + interest   * 0.30
+                       + sleep      * 0.15
+                       - work       * 0.20
+                       + randn() * 0.7;
+      // Survey is a near-perfect proxy for motivation (tight matching will succeed for it,
+      // but not for the variables we never measured).
+      const survey     = motivation * 1.0 + randn() * 0.10;
+      pop.push({ id: i, motivation, anxiety, sleep, interest, work, eagerness, survey });
+    }
+    return pop;
+  }
+
+  function computeGrade(s, treated) {
+    let g = 72;
+    g += s.motivation * 6;
+    g -= s.anxiety    * 2.5;
+    g += s.interest   * 2;
+    g += s.sleep      * 1.5;
+    g -= s.work       * 1.5;
+    if (treated) g += TRUE_EFFECT;
+    g += randn() * 2.5;
+    return Math.max(0, Math.min(100, g));
+  }
+
+  function assignSelfSelection(pop) {
+    const sorted = [...pop].sort((a, b) => b.eagerness - a.eagerness);
+    return { treatment: sorted.slice(0, 100), control: sorted.slice(100) };
+  }
+
+  function assignMatched(pop) {
+    const sorted = [...pop].sort((a, b) => b.eagerness - a.eagerness);
+    const earlyPool = sorted.slice(0, 100);
+    const latePool  = sorted.slice(100);
+    const available = [...latePool];
+    const treatment = [], control = [];
+    earlyPool.forEach(stu => {
+      if (available.length === 0) return;
+      let bestIdx = -1, bestDist = Infinity;
+      for (let i = 0; i < available.length; i++) {
+        const d = Math.abs(available[i].survey - stu.survey);
+        if (d < bestDist) { bestDist = d; bestIdx = i; }
+      }
+      if (bestIdx >= 0 && bestDist < 0.25) {
+        treatment.push(stu);
+        control.push(available[bestIdx]);
+        available.splice(bestIdx, 1);
+      }
+    });
+    return { treatment, control };
+  }
+
+  function assignRandom(pop) {
+    const treatment = [], control = [];
+    pop.forEach(s => {
+      if (Math.random() < 0.5) treatment.push(s);
+      else control.push(s);
+    });
+    return { treatment, control };
+  }
+
+  const methods = {
+    self:    { name: 'Self-selection',    assign: assignSelfSelection },
+    matched: { name: 'Matched groups',    assign: assignMatched },
+    random:  { name: 'Random assignment', assign: assignRandom }
+  };
+
+  function mean(arr) { return arr.reduce((a,b)=>a+b, 0) / arr.length; }
+
+  // ===== Widget factory =====
+  function makeWidget(methodKey, widgetEl, options) {
+    options = options || {};
+    const hasHood = !!options.hasHood;
+    const state = { allResults: [], lastResult: null, hoodVisible: false };
+
+    const $ = sel => widgetEl.querySelector(sel);
+    const runBtn   = $('[data-action="run"]');
+    const hoodBtn  = $('[data-action="hood"]');
+    const counter  = $('.run-counter');
+    const tGrade   = $('.t-grade');
+    const cGrade   = $('.c-grade');
+    const tN       = $('.t-n');
+    const cN       = $('.c-n');
+    const obs      = $('.observed-effect');
+    const obsDelta = $('.observed-delta');
+    const interp   = $('.interpretation');
+    const track    = $('.history-track');
+    const empty    = $('.history-empty');
+    const panel    = $('.reveal-panel');
+    const hoodRuns = $('.hood-runs');
+
+    function run() {
+      const pop = makePopulation();
+      const groups = methods[methodKey].assign(pop);
+      const tGrades = groups.treatment.map(s => computeGrade(s, true));
+      const cGrades = groups.control.map(s => computeGrade(s, false));
+      const tMean = mean(tGrades);
+      const cMean = mean(cGrades);
+      state.lastResult = {
+        treatment: groups.treatment,
+        control: groups.control,
+        tMean, cMean,
+        observed: tMean - cMean
+      };
+      state.allResults.push(state.lastResult);
+      render();
+    }
+
+    function render() {
+      const cnt = state.allResults.length;
+      counter.textContent = cnt + ' run' + (cnt === 1 ? '' : 's');
+
+      if (!state.lastResult) {
+        tGrade.textContent = '—';
+        cGrade.textContent = '—';
+        tN.textContent = '—';
+        cN.textContent = '—';
+        obs.textContent = '—';
+        obsDelta.textContent = '';
+        interp.innerHTML = '';
+        renderHistory();
+        renderHood();
+        return;
+      }
+
+      tGrade.textContent = state.lastResult.tMean.toFixed(1);
+      cGrade.textContent = state.lastResult.cMean.toFixed(1);
+      tN.textContent = state.lastResult.treatment.length;
+      cN.textContent = state.lastResult.control.length;
+
+      const o = state.lastResult.observed;
+      const sign = o >= 0 ? '+' : '';
+      obs.textContent = sign + o.toFixed(1) + '%';
+      obsDelta.textContent = '(experimental − control)';
+
+      renderInterpretation();
+      renderHistory();
+      renderHood();
+    }
+
+    function renderInterpretation() {
+      interp.innerHTML = '';
+      const o = state.lastResult.observed;
+      const overestimate = o - TRUE_EFFECT;
+
+      let cls, msg;
+      if (methodKey === 'self') {
+        cls = 'gap-warning';
+        msg = 'The observed effect (' + (o >= 0 ? '+' : '') + o.toFixed(1)
+          + '%) overstates the program\u2019s real impact by about '
+          + Math.abs(overestimate).toFixed(1)
+          + ' points. Run again — it\u2019ll be wrong in the same direction every time.';
+      } else if (methodKey === 'matched') {
+        cls = 'gap-warning';
+        msg = 'Better than self-selection — matching on the motivation survey closes part of the gap. But the observed effect is still inflated — what\u2019s going on?';
+      } else {
+        cls = 'gap-good';
+        msg = 'No systematic bias. This single run might be a bit high or a bit low by chance, but across many runs the observed effect will cluster around the true effect (+4.0%).';
+      }
+      const div = document.createElement('div');
+      div.className = cls;
+      div.textContent = msg;
+      interp.appendChild(div);
+    }
+
+    function renderHood() {
+      if (!hasHood || !panel) return;
+      if (!state.hoodVisible || state.allResults.length === 0) {
+        panel.classList.remove('show');
+        return;
+      }
+      panel.classList.add('show');
+
+      // Update the "N runs so far" indicator
+      const n = state.allResults.length;
+      if (hoodRuns) {
+        hoodRuns.textContent = n + ' run' + (n === 1 ? '' : 's') + ' so far';
+      }
+
+      // For each hidden variable, average the group means across ALL runs of this method.
+      // This is what makes random assignment look properly balanced (the noise averages out)
+      // while keeping matched-groups' systematic biases visible.
+      const varKeys = ['motivation', 'anxiety', 'sleep', 'interest', 'work'];
+      varKeys.forEach((key, idx) => {
+        const tMeans = state.allResults.map(r => mean(r.treatment.map(s => s[key])));
+        const cMeans = state.allResults.map(r => mean(r.control.map(s => s[key])));
+        setHV(idx + 1, mean(tMeans), mean(cMeans));
+      });
+    }
+
+    function setHV(idx, tVal, cVal) {
+      const tEl = $('.hv' + idx + '-t');
+      const cEl = $('.hv' + idx + '-c');
+      const dEl = $('.hv' + idx + '-d');
+      if (!tEl) return;
+      tEl.textContent = (tVal >= 0 ? '+' : '') + tVal.toFixed(2);
+      cEl.textContent = (cVal >= 0 ? '+' : '') + cVal.toFixed(2);
+      const diff = Math.abs(tVal - cVal);
+      let cls = 'balanced', label = 'very small difference';
+      if (diff > 0.4)       { cls = 'severe';     label = 'groups differ a lot'; }
+      else if (diff > 0.15) { cls = 'imbalanced'; label = 'groups differ noticeably'; }
+      dEl.className = 'var-diff hv' + idx + '-d ' + cls;
+      dEl.textContent = diff.toFixed(2) + ' \u00b7 ' + label;
+    }
+
+    function renderHistory() {
+      track.querySelectorAll('.history-tick, .history-truth-line, .history-zero-line, .history-labels').forEach(n => n.remove());
+      const runs = state.allResults.map(r => r.observed);
+      if (runs.length === 0) {
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      const yMin = -5, yMax = 20;
+      const trackH = 110;
+      const padTop = 12, padBot = 12;
+      const usableH = trackH - padTop - padBot;
+      function yPos(v) {
+        const norm = (v - yMin) / (yMax - yMin);
+        return trackH - padBot - norm * usableH;
+      }
+
+      const labels = document.createElement('div');
+      labels.className = 'history-labels';
+      labels.style.height = trackH + 'px';
+      [[yMax, '+20'], [TRUE_EFFECT, '+4'], [0, '0'], [yMin, '\u22125']].forEach(([v, txt]) => {
+        const el = document.createElement('div');
+        el.style.top = (yPos(v) - 6) + 'px';
+        el.textContent = txt;
+        if (v === TRUE_EFFECT) el.style.color = 'var(--truth)';
+        labels.appendChild(el);
+      });
+      track.appendChild(labels);
+
+      const truthLine = document.createElement('div');
+      truthLine.className = 'history-truth-line';
+      truthLine.style.top = yPos(TRUE_EFFECT) + 'px';
+      truthLine.style.left = '60px';
+      truthLine.style.right = '20px';
+      track.appendChild(truthLine);
+
+      const zeroLine = document.createElement('div');
+      zeroLine.className = 'history-zero-line';
+      zeroLine.style.top = yPos(0) + 'px';
+      zeroLine.style.left = '60px';
+      zeroLine.style.right = '20px';
+      track.appendChild(zeroLine);
+
+      const trackW = track.getBoundingClientRect().width || 800;
+      const usableW = trackW - 80;
+      const dotColor = methodKey === 'random' ? 'var(--treatment)'
+                    : methodKey === 'matched' ? 'var(--warn)'
+                    : '#ff6b6b';
+
+      runs.forEach((v, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'history-tick';
+        const xFrac = runs.length === 1 ? 0.5 : i / (runs.length - 1);
+        const x = 60 + xFrac * usableW;
+        const clipped = Math.max(yMin, Math.min(yMax, v));
+        dot.style.left = x + 'px';
+        dot.style.top = yPos(clipped) + 'px';
+        dot.style.background = dotColor;
+        dot.style.boxShadow = '0 0 6px ' + dotColor;
+        track.appendChild(dot);
+      });
+    }
+
+    runBtn.addEventListener('click', run);
+    if (hoodBtn) {
+      hoodBtn.addEventListener('click', () => {
+        if (!state.lastResult) run();
+        state.hoodVisible = !state.hoodVisible;
+        hoodBtn.textContent = state.hoodVisible ? 'Hide what\u2019s under the hood' : 'Look Under the Hood';
+        renderHood();
+      });
+    }
+
+    render();
+
+    return { renderHistory };
+  }
+
+  // ===== Reveal buttons (IV/DV + Show example) =====
+  document.querySelectorAll('.reveal-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = 'reveal-' + btn.dataset.reveal;
+      const panel = document.getElementById(targetId);
+      if (!panel) return;
+      const isOpen = panel.classList.toggle('show');
+      btn.classList.toggle('open', isOpen);
+    });
+  });
+
+  // ===== Initialize the three widgets =====
+  const widgets = [
+    makeWidget('self',    document.getElementById('widget-self'),    { hasHood: false }),
+    makeWidget('matched', document.getElementById('widget-matched'), { hasHood: true  }),
+    makeWidget('random',  document.getElementById('widget-random'),  { hasHood: true  })
+  ];
+
+  window.addEventListener('resize', () => widgets.forEach(w => w.renderHistory()));
+</script>
+</body>
+</html>
