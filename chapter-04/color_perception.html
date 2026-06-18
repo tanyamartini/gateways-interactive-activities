@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How We See Color — Cone Response Explorer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d12;
+    --bg-elev: #131820;
+    --bg-elev-2: #1a2029;
+    --border: #232a36;
+    --text: #f1ece1;
+    --text-muted: #8a8f99;
+    --text-faint: #565b66;
+    --accent: #f1ece1;
+    --s-cone: #5b9eff;
+    --m-cone: #7ed957;
+    --l-cone: #ff6b6b;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Geist', system-ui, sans-serif;
+    --mono: 'Geist Mono', 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+
+  body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 230, 180, 0.05), transparent),
+      radial-gradient(ellipse 60% 40% at 80% 90%, rgba(91, 158, 255, 0.04), transparent);
+    background-attachment: fixed;
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 32px 80px;
+  }
+
+  /* Header */
+  .eyebrow-book {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.01em;
+  }
+  .eyebrow-book em { font-style: italic; color: var(--text); }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 22px;
+  }
+
+  .credit {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-faint);
+    margin-bottom: 24px;
+    max-width: 620px;
+    line-height: 1.4;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    font-style: italic;
+    font-feature-settings: "ss01";
+    color: var(--text-muted);
+  }
+
+  .lede {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 620px;
+    margin-bottom: 14px;
+  }
+
+  .lede strong {
+    color: var(--text);
+    font-weight: 500;
+    font-style: italic;
+  }
+
+  .lede-final { margin-bottom: 56px; }
+
+  .reflection-prose {
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.55;
+    max-width: 620px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .reflection-prose em {
+    color: var(--text);
+    font-style: italic;
+  }
+
+  /* Spectrum Section */
+  .panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+
+  .panel-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 24px;
+  }
+
+  .panel-label h2 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-label .hint {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Spectrum bar with slider */
+  .spectrum-wrap {
+    position: relative;
+    margin: 12px 0 8px;
+  }
+
+  .spectrum-bar {
+    height: 56px;
+    border-radius: 6px;
+    background: linear-gradient(
+      to right,
+      #4b0082 0%,
+      #0000ff 12%,
+      #00ffff 26%,
+      #00ff00 40%,
+      #ffff00 55%,
+      #ffa500 70%,
+      #ff4500 82%,
+      #8b0000 100%
+    );
+    box-shadow: 0 0 30px rgba(255,255,255,0.05), inset 0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  .spectrum-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 56px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: ew-resize;
+  }
+
+  .spectrum-slider:focus { outline: none; }
+
+  .spectrum-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4px;
+    height: 76px;
+    background: #fff;
+    border-radius: 2px;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,0.5);
+    margin-top: -10px;
+    cursor: ew-resize;
+  }
+
+  .spectrum-slider::-moz-range-thumb {
+    width: 4px;
+    height: 76px;
+    background: #fff;
+    border-radius: 2px;
+    border: none;
+    box-shadow: 0 0 0 2px rgba(0,0,0,0.6), 0 0 12px rgba(255,255,255,0.5);
+    cursor: ew-resize;
+  }
+
+  .spectrum-slider::-moz-range-track {
+    background: transparent;
+    border: none;
+  }
+
+  .spectrum-axis {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+
+  /* Result row */
+  .result-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .swatch-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .swatch {
+    width: 110px;
+    height: 110px;
+    border-radius: 12px;
+    background: #ffeb00;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 8px 32px rgba(0,0,0,0.4);
+    transition: background-color 0.08s linear, box-shadow 0.2s ease;
+  }
+
+  .swatch-info .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 8px;
+  }
+
+  .swatch-info .wavelength {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+
+  .swatch-info .wavelength sup {
+    font-size: 18px;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 4px;
+  }
+
+  .swatch-info .color-name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+
+  /* Activations panel */
+  .activations {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 16px;
+  }
+
+  .activations-header .label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+
+  .activations-header .sublabel {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .cone-row {
+    display: grid;
+    grid-template-columns: 90px 1fr 50px;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .cone-row .name {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cone-row .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .cone-row.s .dot { background: var(--s-cone); }
+  .cone-row.m .dot { background: var(--m-cone); }
+  .cone-row.l .dot { background: var(--l-cone); }
+
+  .bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.06s linear;
+  }
+
+  .cone-row.s .bar-fill { background: var(--s-cone); }
+  .cone-row.m .bar-fill { background: var(--m-cone); }
+  .cone-row.l .bar-fill { background: var(--l-cone); }
+
+  .cone-row .value {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  /* Curves */
+  .curves-panel {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px;
+  }
+
+  .curves-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .curve-legend {
+    display: flex;
+    gap: 28px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+
+  .curve-legend .leg {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .curve-legend .swatch-mini {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+  }
+
+  /* Footer note */
+  .note {
+    margin-top: 32px;
+    font-size: 13px;
+    color: var(--text-faint);
+    line-height: 1.6;
+    max-width: 720px;
+  }
+
+  .note em {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 40px 20px 60px; }
+    .panel, .swatch-panel, .activations, .curves-panel { padding: 22px; }
+    .result-row { grid-template-columns: 1fr; }
+    .swatch { width: 80px; height: 80px; }
+    .swatch-info .wavelength { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow-book"><em>Introduction to Psychology: Gateways to Mind and Behavior</em> &mdash; Coon, Martini &amp; Mitterer</div>
+  <div class="eyebrow">Chapter 4: Sensation, Attention, and Perception · Section 4.2</div>
+  <p class="credit">The idea for this activity is credited to Dr. Steve Emrich, Brock University.</p>
+  <h1>How we see <em>color</em>.</h1>
+  <p class="lede">
+    We learned in Section 4.1 that each of the senses has special transducers that convert
+    the various forms of energy out in the world into electrical energy (in the form of
+    action potentials), since that is the only type of energy that the brain "understands".
+  </p>
+  <p class="lede">
+    So, for example, transducers in the eye translate light energy into action potentials
+    while transducers in the ear do the same thing with mechanical energy (in the form of
+    sound waves). Transducers in the nose and on the tongue translate the chemical energy
+    in odors and food into action potentials.
+  </p>
+  <p class="lede">
+    With regard to vision, there are two types of transducers. The first are
+    <strong>rods</strong>, which are broadly responsible for translating aspects of light
+    energy related to both movement and the basic distinction between light and dark. The
+    second type of transducer in the eye is the <strong>cones</strong>, and they are in
+    charge of translating the properties of light energy that allow us to see color.
+  </p>
+  <p class="lede">
+    There are three types of cones in the human eye — short wave (sometimes referred to as
+    blue cones), medium wave (green cones), and long wave (red cones). Each of these cones
+    responds differently to each specific wavelength of light. The pattern of activation
+    across all three types of cones will determine the specific color that your brain will
+    "see" during perception.
+  </p>
+  <p class="lede">
+    Figure 4.8 provides a simple representation of the relative activity in each of the
+    three types of cones for several basic colors. You can see, for example, that short
+    wave (blue) cones are the most active when we are perceiving the color blue (about
+    465 nm); medium (green) and long (red) wave cones are much less active when we are
+    exposed to things that we perceive as blue.
+  </p>
+  <p class="lede lede-final">
+    This activity allows you to become more familiar with the activity of the three types
+    of cones when we perceive a variety of colors in the visible spectrum. To see how
+    firing in the three types of cones changes, drag the slider across the colors of the
+    visible spectrum.
+  </p>
+
+  <!-- Spectrum slider -->
+  <div class="panel">
+    <div class="panel-label">
+      <h2>The visible spectrum</h2>
+      <span class="hint">380 – 750 nm</span>
+    </div>
+    <div class="spectrum-wrap">
+      <div class="spectrum-bar"></div>
+      <input type="range" min="380" max="750" step="1" value="578" class="spectrum-slider" id="slider" aria-label="Wavelength">
+    </div>
+    <div class="spectrum-axis">
+      <span>380 nm · violet</span>
+      <span>500 nm · cyan</span>
+      <span>580 nm · yellow</span>
+      <span>650 nm · red</span>
+      <span>750 nm</span>
+    </div>
+  </div>
+
+  <!-- Result row: swatch + activations -->
+  <div class="result-row">
+    <div class="swatch-panel">
+      <div class="swatch" id="swatch"></div>
+      <div class="swatch-info">
+        <div class="label">Perceived color</div>
+        <div class="wavelength"><span id="wavelength-val">578</span><sup>nm</sup></div>
+        <div class="color-name" id="color-name">Yellow</div>
+      </div>
+    </div>
+
+    <div class="activations">
+      <div class="activations-header">
+        <div class="label">Cone activation</div>
+        <div class="sublabel">How strongly each cone is firing — % of its peak response</div>
+      </div>
+      <div class="cone-row s">
+        <span class="name"><span class="dot"></span>S · blue</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-s" style="width:0%"></div></div>
+        <span class="value" id="val-s">0%</span>
+      </div>
+      <div class="cone-row m">
+        <span class="name"><span class="dot"></span>M · green</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-m" style="width:0%"></div></div>
+        <span class="value" id="val-m">0%</span>
+      </div>
+      <div class="cone-row l">
+        <span class="name"><span class="dot"></span>L · red</span>
+        <div class="bar-track"><div class="bar-fill" id="bar-l" style="width:0%"></div></div>
+        <span class="value" id="val-l">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cone response curves -->
+  <div class="curves-panel">
+    <div class="panel-label">
+      <h2>Cone response functions</h2>
+      <span class="hint">% of peak response</span>
+    </div>
+    <svg class="curves-svg" viewBox="0 0 1000 390" preserveAspectRatio="none" id="curves">
+      <!-- gridlines -->
+      <g stroke="#232a36" stroke-width="1">
+        <line x1="60" y1="20" x2="60" y2="320"/>
+        <line x1="60" y1="320" x2="980" y2="320"/>
+        <line x1="60" y1="170" x2="980" y2="170" stroke-dasharray="2,4" opacity="0.5"/>
+        <line x1="60" y1="20" x2="980" y2="20" stroke-dasharray="2,4" opacity="0.5"/>
+      </g>
+      <!-- y-axis labels -->
+      <g font-family="Geist Mono, monospace" font-size="10" fill="#565b66">
+        <text x="50" y="24" text-anchor="end">100%</text>
+        <text x="50" y="174" text-anchor="end">50%</text>
+        <text x="50" y="324" text-anchor="end">0%</text>
+      </g>
+      <!-- y-axis title -->
+      <text x="16" y="170" font-family="Geist Mono, monospace" font-size="11"
+            fill="#8a8f99" text-anchor="middle" dominant-baseline="central"
+            transform="rotate(-90, 16, 170)">Strength of Cone Firing</text>
+      <!-- x-axis labels -->
+      <g font-family="Geist Mono, monospace" font-size="10" fill="#565b66" text-anchor="middle">
+        <text x="60" y="345">380</text>
+        <text x="290" y="345">450</text>
+        <text x="540" y="345">525</text>
+        <text x="790" y="345">650</text>
+        <text x="980" y="345">750</text>
+      </g>
+      <!-- x-axis title -->
+      <text x="520" y="378" font-family="Geist Mono, monospace" font-size="11"
+            fill="#8a8f99" text-anchor="middle">Wavelength (nm)</text>
+      <!-- curves -->
+      <path id="curve-s" fill="none" stroke="#5b9eff" stroke-width="2.5" stroke-linejoin="round"/>
+      <path id="curve-m" fill="none" stroke="#7ed957" stroke-width="2.5" stroke-linejoin="round"/>
+      <path id="curve-l" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- indicator -->
+      <line id="indicator" x1="500" y1="20" x2="500" y2="320" stroke="#f1ece1" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+      <!-- intercept dots -->
+      <circle id="dot-s" cx="500" cy="200" r="5" fill="#5b9eff" stroke="#0a0d12" stroke-width="2"/>
+      <circle id="dot-m" cx="500" cy="200" r="5" fill="#7ed957" stroke="#0a0d12" stroke-width="2"/>
+      <circle id="dot-l" cx="500" cy="200" r="5" fill="#ff6b6b" stroke="#0a0d12" stroke-width="2"/>
+    </svg>
+
+    <div class="curve-legend">
+      <span class="leg"><span class="swatch-mini" style="background:#5b9eff"></span>S-cone — peak ≈ 440 nm (short / "blue")</span>
+      <span class="leg"><span class="swatch-mini" style="background:#7ed957"></span>M-cone — peak ≈ 540 nm (medium / "green")</span>
+      <span class="leg"><span class="swatch-mini" style="background:#ff6b6b"></span>L-cone — peak ≈ 565 nm (long / "red")</span>
+    </div>
+  </div>
+
+  <p class="reflection-prose">
+    One thing that this activity makes clear is that while it may seem simpler to refer to
+    the cones as 'red', 'green' and 'blue' (rather than short, medium, and long wave), this
+    can actually be a bit misleading. For example, <em>what color do you see when the 'red'
+    (long wave) cones are most active?</em>
+  </p>
+
+  <p class="note">
+    <em>Note for instructors:</em> The cone curves are log-Gaussian approximations of the
+    Stockman-Sharpe (2000) 2° cone fundamentals — peaks, widths, and the long-wavelength
+    tail of the L-cone are reasonably accurate. L-cone activity at 750 nm is small but
+    not zero (about 0.08%), and the readout shows two significant figures so this is
+    visible. (On a linear-scale plot the tail still looks flat against the axis — that's
+    expected; you'd need a log y-axis to see it as a curve.) A pedagogical aside: the
+    "red" cone peaks in the yellow-orange (~565 nm), not the red, and the "green" cone
+    peaks at yellow-green (~540 nm) — the colloquial names are misleading. The perceived
+    color swatch uses a standard wavelength-to-RGB mapping; monitors can't reproduce
+    pure spectral colors at the violet and red extremes, so those endpoints look dimmer
+    than they would in real life.
+  </p>
+
+</div>
+
+<script>
+  // ========== Cone response functions ==========
+  // Log-Gaussian approximation of Stockman-Sharpe (2000) 2° cone fundamentals.
+  // Captures the asymmetric shape: shorter, steeper short-wavelength side and
+  // a long-wavelength tail. Normalized to peak = 1.0.
+  function coneResponse(lambda, lambdaMax, sigma) {
+    const z = Math.log(lambda / lambdaMax) / sigma;
+    return Math.exp(-0.5 * z * z);
+  }
+
+  function S(lambda) { return coneResponse(lambda, 440, 0.045); }
+  function M(lambda) { return coneResponse(lambda, 540, 0.070); }
+  function L(lambda) { return coneResponse(lambda, 565, 0.075); }
+
+  // ========== Pretty-print activation values with appropriate precision ==========
+  function formatPct(v) {
+    const pct = v * 100;
+    if (pct >= 10)     return pct.toFixed(0) + '%';
+    if (pct >= 1)      return pct.toFixed(1) + '%';
+    if (pct >= 0.001)  return pct.toPrecision(2) + '%';
+    if (pct > 0)       return '< 0.001%';
+    return '0%';
+  }
+
+  // ========== Wavelength → RGB (display approximation) ==========
+  function wavelengthToRGB(w) {
+    let r=0, g=0, b=0;
+    if (w >= 380 && w < 440)      { r = -(w-440)/(440-380); g = 0; b = 1; }
+    else if (w >= 440 && w < 490) { r = 0; g = (w-440)/(490-440); b = 1; }
+    else if (w >= 490 && w < 510) { r = 0; g = 1; b = -(w-510)/(510-490); }
+    else if (w >= 510 && w < 580) { r = (w-510)/(580-510); g = 1; b = 0; }
+    else if (w >= 580 && w < 645) { r = 1; g = -(w-645)/(645-580); b = 0; }
+    else if (w >= 645 && w <= 750){ r = 1; g = 0; b = 0; }
+
+    let factor = 1;
+    if (w >= 380 && w < 420)       factor = 0.3 + 0.7*(w-380)/40;
+    else if (w >= 420 && w < 700)  factor = 1;
+    else if (w >= 700 && w <= 750) factor = 0.3 + 0.7*(750-w)/50;
+
+    const gamma = 0.8;
+    const R = Math.round(255 * Math.pow(r * factor, gamma));
+    const G = Math.round(255 * Math.pow(g * factor, gamma));
+    const B = Math.round(255 * Math.pow(b * factor, gamma));
+    return `rgb(${R}, ${G}, ${B})`;
+  }
+
+  // ========== Approximate color name ==========
+  function colorName(w) {
+    if (w < 425) return "Violet";
+    if (w < 450) return "Indigo";
+    if (w < 490) return "Blue";
+    if (w < 510) return "Cyan";
+    if (w < 545) return "Green";
+    if (w < 575) return "Yellow-green";
+    if (w < 590) return "Yellow";
+    if (w < 620) return "Orange";
+    if (w < 660) return "Red";
+    return "Deep red";
+  }
+
+  // ========== Build the SVG curve paths once ==========
+  // SVG coordinate mapping: x: 380→60, 750→980; y: 0→320, 1→20
+  const X0 = 60, X1 = 980, Y0 = 320, Y1 = 20;
+  function xMap(w) { return X0 + (w - 380) * (X1 - X0) / (750 - 380); }
+  function yMap(v) { return Y0 + v * (Y1 - Y0); }
+
+  function buildPath(fn) {
+    let d = "";
+    for (let w = 380; w <= 750; w += 2) {
+      const x = xMap(w).toFixed(1);
+      const y = yMap(fn(w)).toFixed(1);
+      d += (w === 380 ? "M" : "L") + x + "," + y + " ";
+    }
+    return d;
+  }
+
+  document.getElementById('curve-s').setAttribute('d', buildPath(S));
+  document.getElementById('curve-m').setAttribute('d', buildPath(M));
+  document.getElementById('curve-l').setAttribute('d', buildPath(L));
+
+  // ========== Update on slider change ==========
+  const slider = document.getElementById('slider');
+  const swatch = document.getElementById('swatch');
+  const wlVal  = document.getElementById('wavelength-val');
+  const cName  = document.getElementById('color-name');
+  const barS = document.getElementById('bar-s'), valS = document.getElementById('val-s');
+  const barM = document.getElementById('bar-m'), valM = document.getElementById('val-m');
+  const barL = document.getElementById('bar-l'), valL = document.getElementById('val-l');
+  const indicator = document.getElementById('indicator');
+  const dotS = document.getElementById('dot-s');
+  const dotM = document.getElementById('dot-m');
+  const dotL = document.getElementById('dot-l');
+
+  function update() {
+    const w = parseInt(slider.value, 10);
+    const sv = S(w), mv = M(w), lv = L(w);
+
+    swatch.style.background = wavelengthToRGB(w);
+    wlVal.textContent = w;
+    cName.textContent = colorName(w);
+
+    barS.style.width = (sv*100) + '%';
+    barM.style.width = (mv*100) + '%';
+    barL.style.width = (lv*100) + '%';
+    valS.textContent = formatPct(sv);
+    valM.textContent = formatPct(mv);
+    valL.textContent = formatPct(lv);
+
+    const x = xMap(w);
+    indicator.setAttribute('x1', x); indicator.setAttribute('x2', x);
+    dotS.setAttribute('cx', x); dotS.setAttribute('cy', yMap(sv));
+    dotM.setAttribute('cx', x); dotM.setAttribute('cy', yMap(mv));
+    dotL.setAttribute('cx', x); dotL.setAttribute('cy', yMap(lv));
+  }
+
+  slider.addEventListener('input', update);
+  update();
+</script>
+</body>
+</html>
