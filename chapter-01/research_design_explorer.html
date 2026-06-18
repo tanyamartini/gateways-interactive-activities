@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exploring Relationships Between Variables</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..600&family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:           #0a0d12;
+  --bg-elev:      #131820;
+  --bg-elev-2:    #1a2029;
+  --border:       #232a36;
+  --border-bright:#2f3845;
+  --text:         #f1ece1;
+  --text-muted:   #8a8f99;
+  --text-faint:   #565b66;
+  --corr:         #5b9eff;
+  --quasi:        #ffb84d;
+  --exp:          #7ed957;
+  --accent:       #d4a4ff;
+  --red:          #ff6b6b;
+  --serif: 'Fraunces', Georgia, serif;
+  --sans:  'Geist', system-ui, sans-serif;
+  --mono:  'Geist Mono', 'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255,230,180,0.04), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 90%,  rgba(91,158,255,0.04),  transparent);
+  background-attachment: fixed;
+}
+.container { max-width: 1000px; margin: 0 auto; padding: 60px 32px 100px; }
+
+/* ── HEADER ── */
+.eyebrow-book {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  letter-spacing: 0.01em;
+}
+.eyebrow-book em { font-style: italic; color: var(--text); }
+.eyebrow-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 22px;
+}
+h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(30px, 4.5vw, 50px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+}
+h1 em { font-style: italic; color: var(--text-muted); }
+.lede {
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1.65;
+  max-width: 700px;
+  margin-bottom: 56px;
+}
+.lede strong { color: var(--text); font-weight: 500; }
+
+/* ── SECTIONS ── */
+.section { border-top: 1px solid var(--border); padding-top: 40px; margin-top: 56px; }
+.sec-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 10px;
+}
+.section h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 30px;
+  letter-spacing: -0.01em;
+  margin-bottom: 22px;
+}
+.s-exp   h2 { color: var(--exp); }
+.s-quasi h2 { color: var(--quasi); }
+.s-corr  h2 { color: var(--corr); }
+
+/* ── BODY TEXT ── */
+p.bt { color: var(--text-muted); font-size: 15px; line-height: 1.72; max-width: 760px; margin-bottom: 18px; }
+p.bt strong { color: var(--text); font-weight: 500; }
+p.bt em     { color: var(--text); font-style: italic; }
+p.bt-note {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.72;
+  max-width: 760px;
+  margin-bottom: 18px;
+  font-style: italic;
+  padding: 14px 18px;
+  border-left: 3px solid var(--border-bright);
+  background: var(--bg-elev);
+  border-radius: 0 8px 8px 0;
+}
+p.bt-note strong { color: var(--text); font-weight: 600; font-style: normal; }
+
+/* ── SCENARIO ── */
+.scenario {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 26px;
+  margin: 22px 0;
+  max-width: 760px;
+  font-size: 15px;
+  color: var(--text-muted);
+  line-height: 1.72;
+}
+.scenario strong { color: var(--text); font-weight: 500; }
+
+/* ── CHARTS ── */
+p.instruction {
+  font-size: 11px; color: var(--text-faint);
+  font-family: var(--mono); letter-spacing: 0.08em; margin-bottom: 10px;
+}
+.chart-wrap {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px 6px 2px;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+/* ── TOOLTIP ── */
+.tip {
+  position: absolute;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  padding: 12px 12px 10px;
+  width: 182px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s;
+  z-index: 100;
+}
+.tip.show { opacity: 1; }
+.tip-avatar { display: block; margin: 0 auto 8px; border-radius: 50%; overflow: hidden; }
+.tip-name {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  text-align: center;
+  color: var(--text);
+  margin-bottom: 7px;
+}
+.tip-stats {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.9;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+.tip-detail {
+  font-size: 12px;
+  color: var(--text-faint);
+  text-align: center;
+  font-style: italic;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  line-height: 1.5;
+}
+
+/* ── REVEAL BUTTON ── */
+.reveal-btn {
+  background: var(--bg-elev);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.reveal-btn::before {
+  content: '+';
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text-faint);
+  transition: all 0.2s ease;
+  display: inline-block;
+  width: 12px;
+}
+.reveal-btn.open::before { content: '−'; color: var(--text); }
+.reveal-btn:hover { background: var(--bg-elev-2); border-color: var(--text-faint); }
+
+/* ── FEATURE BOX ── */
+.feat-box { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+.feat-box.open { max-height: 1100px; margin-top: 4px; }
+.feat-inner {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px 26px;
+  max-width: 760px;
+}
+.s-exp   .feat-inner { border-left: 3px solid var(--exp); }
+.s-quasi .feat-inner { border-left: 3px solid var(--quasi); }
+.s-corr  .feat-inner { border-left: 3px solid var(--corr); }
+.feat-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  font-size: 14.5px;
+  line-height: 1.67;
+  color: var(--text-muted);
+}
+.feat-item:last-child { margin-bottom: 0; }
+.feat-item strong { color: var(--text); font-weight: 500; }
+.feat-item em     { color: var(--text); font-style: italic; }
+.feat-num {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  width: 22px; height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+/* ── MINI QUIZ ── */
+.quiz-wrap { display: flex; flex-direction: column; gap: 14px; max-width: 760px; margin: 24px 0 0; }
+.quiz-q {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  transition: border-color 0.25s;
+}
+.quiz-q.ac { border-color: var(--exp); }
+.quiz-q.aw { border-color: var(--red); }
+.q-num { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--text-faint); text-transform: uppercase; margin-bottom: 9px; }
+.q-text { font-family: var(--serif); font-style: italic; font-size: 15.5px; color: var(--text); line-height: 1.5; margin-bottom: 10px; }
+.q-response { font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); background: var(--bg-elev-2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; margin-bottom: 16px; line-height: 1.5; letter-spacing: 0.02em; }
+.q-btns { display: flex; gap: 10px; }
+.q-btn {
+  flex: 1;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: center;
+}
+.q-btn:hover:not(:disabled) { background: var(--bg-elev); border-color: var(--text-faint); color: var(--text); }
+.q-btn:disabled { cursor: default; }
+.q-btn.correct  { background: rgba(126,217,87,0.1); border-color: var(--exp); color: var(--exp); }
+.q-btn.wrong    { background: rgba(255,107,107,0.1); border-color: var(--red); color: var(--red); }
+.q-btn.missed   { background: rgba(126,217,87,0.06); border-color: var(--exp); color: var(--exp); opacity: 0.65; }
+.q-feedback { display: none; margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 13.5px; line-height: 1.67; color: var(--text-muted); }
+.q-feedback.show { display: block; }
+.q-feedback.fc { background: rgba(126,217,87,0.07); border-left: 3px solid var(--exp); }
+.q-feedback.fw { background: rgba(255,107,107,0.07); border-left: 3px solid var(--red); }
+.q-feedback strong { color: var(--text); }
+.quiz-summary { display: none; background: var(--bg-elev); border: 1px solid var(--border-bright); border-left: 3px solid var(--accent); border-radius: 12px; padding: 24px 26px; margin-top: 16px; max-width: 760px; }
+.quiz-summary.show { display: block; }
+.quiz-score { font-family: var(--serif); font-weight: 300; font-size: 42px; color: var(--text); letter-spacing: -0.02em; margin-bottom: 4px; }
+.quiz-score-sub { font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+.quiz-score-note { font-size: 14px; color: var(--text-muted); line-height: 1.68; max-width: 580px; }
+
+@media (max-width: 600px) {
+  .container { padding: 40px 20px 80px; }
+  h1 { font-size: 26px; }
+  .section h2 { font-size: 24px; }
+  .q-btns { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="eyebrow-book"><em>Introduction to Psychology: Gateways to Mind and Behavior</em> &mdash; Coon, Martini &amp; Mitterer</div>
+  <div class="eyebrow-sub">Chapter 1: The Foundations of Psychological Science &middot; Sections 1.6 and 1.7</div>
+  <h1>Exploring Relationships<br><em>Between Variables</em></h1>
+  <p class="lede">Psychological researchers use different methods to study the relationships between variables. Three of the most common are <strong>experimental</strong>, <strong>quasi-experimental</strong>, and <strong>correlational</strong> methods. This activity walks you through all three — using the same research question each time — so you can see exactly what makes each design different.</p>
+
+  <!-- ══ SECTION: BACKGROUND ══ -->
+  <div class="section">
+    <div class="sec-eyebrow">Background to this Activity</div>
+    <h2>Getting to Grips with Variables</h2>
+
+    <p class="bt">We discuss variables in Section 1.6, defining them as <em>any behavior, mental process, or characteristic that can change (or vary) across time, situations, or people</em>. So in terms of behaviors and mental processes, people's frequency of depressive thinking is a variable, as are things like the amount of alcohol that people consume each day, our ability to remember things, feelings of loneliness or stress, levels of creativity or empathy, and behavioral expressions of things like sadism, leadership, or extroversion.</p>
+
+    <p class="bt">But as the definition states, personal details (that is, our characteristics) can also be variables. For example, marital status is a variable, as are religious and political affiliation, age, ethnicity, country of birth, and biological sex. But we're also measuring variables when we ask people about characteristics such as which football team they support, what type of food they most prefer, or their favorite social media platform.</p>
+
+    <p class="bt">Using these examples as a starting point, it's worth noting that there are two kinds of variables that you should be aware of: <strong>continuous variables</strong> and <strong>categorical (grouping) variables</strong>. Let's try to unpack the difference between them.</p>
+
+    <p class="bt">When we measure a variable, we're essentially assessing something about each person in our sample. For some variables, the answer when we assess that person will be a <em>number</em> that falls somewhere along a scale: How many hours did you sleep each night, on average, over the last six months? How often do you smoke cannabis? How comfortable do you feel in large groups? How happy do you feel when you engage with social media? Variables like these — where people's answers fall anywhere within a broad range along some kind of continuous scale — are called <strong>continuous variables</strong>.</p>
+
+    <p class="bt">For other variables, the answer to our questions will be a category label rather than a value on a scale: What is your nationality? Do you provide care for an elderly relative? What gender do you identify as? Which political party do you identify with? These are <strong>categorical variables</strong>. Rather than placing people's responses on a scale, a categorical variable sorts people into groups (which is why they are sometimes called grouping variables). So a categorical variable would be the basis for sorting people into parents vs. nonparents, Democrats vs. Republicans, or people whose favorite social media site is TikTok vs. Instagram vs. Facebook.</p>
+
+    <p class="bt">It's worth noting that <strong>continuous variables can be converted into categorical variables, but the reverse is not true</strong>. So, for example, if we were to ask a group of adults how old they were, this would be a continuous variable, and the answers might range along a scale from 18 to 100 years of age. However, we could use those (continuous) responses to divide people into three categorical groups such as younger (18–39 years), middle-aged (40–64 years), and older (65–100 years) adults.</p>
+
+    <p class="bt">To make sure you understand the difference between continuous and categorical variables, let's do a quick check on your understanding. Below are five questions that a psychological scientist might ask their participants. For each one, decide whether the question is assessing a <strong>continuous</strong> or a <strong>categorical</strong> variable.</p>
+
+    <!-- MINI QUIZ -->
+    <div class="quiz-wrap" id="quiz">
+
+      <div class="quiz-q" id="qq1">
+        <div class="q-num">Question 1 of 5</div>
+        <div class="q-text">"How many cups of coffee or other caffeinated drinks do you consume on an average day?"</div>
+        <div class="q-response">Response format: A number &nbsp;— &nbsp;e.g., 0, 2, or 5 cups</div>
+        <div class="q-btns">
+          <button class="q-btn" data-type="continuous" onclick="answer(1,'continuous')">Continuous Variable</button>
+          <button class="q-btn" data-type="categorical" onclick="answer(1,'categorical')">Categorical Variable</button>
+        </div>
+        <div class="q-feedback" id="qf1"></div>
+      </div>
+
+      <div class="quiz-q" id="qq2">
+        <div class="q-num">Question 2 of 5</div>
+        <div class="q-text">"Which of the following best describes where you grew up?"</div>
+        <div class="q-response">Response format: &nbsp;Urban (city) &nbsp;/&nbsp; Suburban &nbsp;/&nbsp; Rural (small town or countryside)</div>
+        <div class="q-btns">
+          <button class="q-btn" data-type="continuous" onclick="answer(2,'continuous')">Continuous Variable</button>
+          <button class="q-btn" data-type="categorical" onclick="answer(2,'categorical')">Categorical Variable</button>
+        </div>
+        <div class="q-feedback" id="qf2"></div>
+      </div>
+
+      <div class="quiz-q" id="qq3">
+        <div class="q-num">Question 3 of 5</div>
+        <div class="q-text">"How many hours per week do you typically spend exercising or doing physical activity?"</div>
+        <div class="q-response">Response format: A number &nbsp;— &nbsp;e.g., 0, 3, or 10 hours</div>
+        <div class="q-btns">
+          <button class="q-btn" data-type="continuous" onclick="answer(3,'continuous')">Continuous Variable</button>
+          <button class="q-btn" data-type="categorical" onclick="answer(3,'categorical')">Categorical Variable</button>
+        </div>
+        <div class="q-feedback" id="qf3"></div>
+      </div>
+
+      <div class="quiz-q" id="qq4">
+        <div class="q-num">Question 4 of 5</div>
+        <div class="q-text">"What is your birth order in your family?"</div>
+        <div class="q-response">Response format: &nbsp;Firstborn &nbsp;/&nbsp; Middle child &nbsp;/&nbsp; Youngest child &nbsp;/&nbsp; Only child</div>
+        <div class="q-btns">
+          <button class="q-btn" data-type="continuous" onclick="answer(4,'continuous')">Continuous Variable</button>
+          <button class="q-btn" data-type="categorical" onclick="answer(4,'categorical')">Categorical Variable</button>
+        </div>
+        <div class="q-feedback" id="qf4"></div>
+      </div>
+
+      <div class="quiz-q" id="qq5">
+        <div class="q-num">Question 5 of 5</div>
+        <div class="q-text">"How many text messages do you typically send in a day?"</div>
+        <div class="q-response">Response format: A number &nbsp;— &nbsp;e.g., 0, 20, or 80 messages</div>
+        <div class="q-btns">
+          <button class="q-btn" data-type="continuous" onclick="answer(5,'continuous')">Continuous Variable</button>
+          <button class="q-btn" data-type="categorical" onclick="answer(5,'categorical')">Categorical Variable</button>
+        </div>
+        <div class="q-feedback" id="qf5"></div>
+      </div>
+
+    </div>
+
+    <div class="quiz-summary" id="quiz-summary">
+      <div class="quiz-score" id="quiz-score-txt"></div>
+      <div class="quiz-score-sub">correct out of 5</div>
+      <div class="quiz-score-note" id="quiz-score-note"></div>
+    </div>
+
+  </div>
+
+  <!-- ══ SECTION: ROLE OF VARIABLES ══ -->
+  <div class="section">
+    <div class="sec-eyebrow">One Question, Three Methods</div>
+    <h2>The Role of Variables in Psychological Research</h2>
+
+    <p class="bt">Most psychological research explores the relationships between variables. For example, does your level of social anxiety have any connection to the number of friends you have? Is attention span associated with grades in school? Is marital status related to happiness? Can cannabis consumption be linked to memory problems? Is biological sex connected to aggression?</p>
+
+    <p class="bt">Researchers can use different methods to address questions about the relationship between variables. Three that are very common are <strong>experimental methods</strong> (true experiments; see Section 1.6), <strong>quasi-experimental methods</strong> (Section 1.7), and <strong>correlational methods</strong> (Section 1.7). In this activity, we'll explore all three.</p>
+
+    <p class="bt">Each of the three methods outlined below examines the relationship between variables in different ways. For the purposes of this activity, we'll consider only the simplest possible case — studies involving the relationship between two variables only.</p>
+
+    <p class="bt-note"><strong>One important point to note before we begin:</strong> When figuring out what type of method a researcher is using, it's helpful to establish whether or not a categorical variable is being used to create groups of people for the purposes of comparison.</p>
+  </div>
+
+  <!-- ══ METHOD 1: EXPERIMENTAL ══ -->
+  <div class="section s-exp">
+    <div class="sec-eyebrow">Method 1</div>
+    <h2>Experimental</h2>
+
+    <p class="bt">As we note in Section 1.6, experimental methods are special because they allow us to make <strong>causal statements</strong> about the relationship between two variables; for example, that stress causes anxiety to increase, or that exercise causes an increase in well-being, or that taking a particular drug causes a decrease in the symptoms of dementia.</p>
+
+    <p class="bt">Identifying whether a study is experimental requires that you look for two things. First, <strong>one variable will be categorical</strong>. The categorical (grouping) variable results in participants being put in one of two (or more) groups that will be compared. The <strong>second variable will typically be continuous</strong>.</p>
+
+    <p class="bt">Using the language of a true experiment, the categorical (grouping) variable is the <strong>independent variable</strong>, and the continuous variable is the <strong>dependent variable</strong> (see Section 1.6). After gathering data, the researcher will compare the average scores of the two groups (defined by the independent variable) on the dependent variable.</p>
+
+    <p class="bt">In Section 1.6 we note that <strong>the independent (grouping) variable is manipulated, or controlled, by the researcher</strong>. What that means is that the researcher is responsible for determining which group each participant is put in.</p>
+
+    <p class="bt">More important, though, is the fact that in a true experiment <strong>the researcher assigns participants to groups randomly</strong> — using, for example, the flip of a coin (heads the participant is in one group; tails they are in the other group), the roll of a die (even numbers means assignment to one group and odd numbers to the other group), or selecting a playing card from a deck (people who select red cards go in one group; black cards in the other).</p>
+
+    <p class="bt"><em>Please see our interactive activity about random assignment to understand why it is so important to researchers' ability to make cause-and-effect statements about the relationship between the independent and dependent variables.</em></p>
+
+    <p class="bt">Let's take a look at an example.</p>
+
+    <div class="scenario">
+      <strong>The study:</strong> Researchers were interested in examining the relationship between sleep and problem-solving ability. These researchers recruited 800 university students for their study. They then used a coin flip to randomly assign each person to one of two groups. The "quality sleep group" received a structured plan that was known to help people achieve 8 hours of quality sleep per night. The other group (the "control" group) received no instructions about how to improve their sleep; they were just asked to engage in their normal sleep habits while taking part in the study. After one month, all of the participants were tested on their ability to solve a series of problems and each person was given a problem-solving score that ranged from 0–100%. Next, an average problem-solving score was calculated for the two groups and these average scores were compared.
+    </div>
+
+    <div class="chart-wrap">
+      <svg id="svg-e" width="100%" viewBox="0 0 860 300" style="display:block"></svg>
+    </div>
+
+    <button class="reveal-btn" onclick="toggleFeat('feat-e',this)">What makes this a true experiment?</button>
+    <div class="feat-box" id="feat-e">
+      <div class="feat-inner">
+        <div class="feat-item"><div class="feat-num">1</div><div><strong>Categorical and continuous variable.</strong> The categorical variable (independent variable) puts the participants in one of two groups (quality sleep group or control group). The continuous variable (dependent variable; problem-solving score) was measured for each participant; the average problem-solving score for each of the two groups is then compared after data are collected.</div></div>
+        <div class="feat-item"><div class="feat-num">2</div><div><strong>Random assignment on the categorical (independent) variable.</strong> Whether people were assigned to the quality sleep or control group was determined by chance (coin flip).</div></div>
+        <div class="feat-item"><div class="feat-num">3</div><div><strong>What we can conclude:</strong> If the quality sleep group has a better average problem-solving score than the control group at the end of the study, we have strong evidence that better sleep <em>causes</em> an improvement in problem solving.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ METHOD 2: QUASI-EXPERIMENTAL ══ -->
+  <div class="section s-quasi">
+    <div class="sec-eyebrow">Method 2</div>
+    <h2>Quasi-Experimental</h2>
+
+    <p class="bt">True experiments are special because they allow us to make causal statements about the relationship between two variables. The non-experimental research methods outlined in Section 1.7 also explore the relationships between variables, but they don't allow us to establish cause-and-effect relationships.</p>
+
+    <p class="bt">Quasi-experiments are one type of non-experimental method. They are, in many ways, very similar to true experiments. As is the case with experiments, <strong>one variable will be categorical</strong> (that is, a grouping variable) and the <strong>second variable will typically be continuous</strong>. Also similar to experiments, the researcher will compare the average scores of the groups on the continuous variable.</p>
+
+    <p class="bt">The key difference between true and quasi-experiments is that <strong>the researcher does not control (randomly assign) participants to the groups</strong> defined by the categorical variable, either because it would be <em>impossible</em> or <em>unethical</em> to do so.</p>
+
+    <p class="bt">For example, it's impossible to randomly assign people to groups when the categorical variable of interest is a fundamental characteristic of the person (for example, marital status, political affiliation, whether they are a parent or not). But sometimes we're interested in categorical variables for which random assignment would be deeply unethical. If we wanted to study the relationship between trauma (categorical variable: trauma survivor or not) and the quality of one's friendships, it would not be ethical for a researcher to randomly assign one half of their participants to a group that would experience trauma and the other half to a group that would not. The same would be true in a study designed to investigate whether smoking (categorical variable: smoker or not) was related to lung capacity — you would never get permission to randomly assign people to groups where they were forced to smoke (or not smoke). It's this inability to randomly assign participants to groups that prevents researchers from being able to make causal statements about the relationship between the variables.</p>
+
+    <div class="scenario">
+      <strong>The study:</strong> Imagine that the same group of researchers is still interested in the relationship between sleep and problem-solving ability. Unlike their true experiment, though, this time the researchers sorted 800 students into two groups according to the average number of hours of sleep these participants reported that they got each night. Participants who typically slept fewer than 8 hours per night were put in the "short sleepers" group and students who reported that they usually slept 8 or more hours per night were put in the "long sleepers" group. All of the participants completed the problem-solving test (achieving a score of 0–100%), and then the researchers compared the average problem-solving scores of the two groups. Note that in this situation, the researchers are not manipulating the independent variable (categorical variable: short or long sleepers) through random assignment — instead, participants were put into a group based on their existing sleep habits.
+    </div>
+
+    <div class="chart-wrap">
+      <svg id="svg-q" width="100%" viewBox="0 0 860 320" style="display:block"></svg>
+    </div>
+
+    <button class="reveal-btn" onclick="toggleFeat('feat-q',this)">What makes this quasi-experimental?</button>
+    <div class="feat-box" id="feat-q">
+      <div class="feat-inner">
+        <div class="feat-item"><div class="feat-num">1</div><div><strong>Categorical and continuous variable.</strong> The categorical variable (independent variable) puts the participants in one of two groups (short or long sleepers). The continuous variable (dependent variable; problem-solving score) was measured for each participant; the average problem-solving score for each of the two groups is then compared after data are collected.</div></div>
+        <div class="feat-item"><div class="feat-num">2</div><div><strong>No manipulation (random assignment) by researchers.</strong> Researchers don't control which group the participant is placed in. Instead, the group they are assigned to is determined by their own characteristics (the number of hours they reported sleeping each night).</div></div>
+        <div class="feat-item"><div class="feat-num">3</div><div><strong>What we can conclude:</strong> The amount of sleep that people get (short vs. long sleepers) appears to be related to problem-solving ability, but we cannot conclude that it <em>causes</em> changes in problem-solving ability. Why? Because short and long sleepers may also differ in many ways beyond how much they sleep — for example, work schedules, anxiety, family support, financial stress. Any of these other variables could explain the group difference in problem-solving scores, making it very hard to isolate sleep as the cause of observed differences between the groups.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ METHOD 3: CORRELATIONAL ══ -->
+  <div class="section s-corr">
+    <div class="sec-eyebrow">Method 3</div>
+    <h2>Correlational</h2>
+
+    <p class="bt">The key to identifying a correlational study lies in the fact that we're typically examining a <strong>relationship between two continuous variables</strong>, rather than comparing groups. Here's an example, again examining the relationship between sleep and problem-solving ability:</p>
+
+    <div class="scenario">
+      <strong>The study:</strong> In this final study, the researchers surveyed another 800 university students. Each of these participants reported the average number of hours they slept the previous night (a continuous variable), and then the researchers administered the problem-solving test and obtained each person's score (0–100%; another continuous variable). In this study, no one was put into a group using a categorical variable. The researchers simply recorded the two numbers (number of hours slept and problem-solving score) for each participant and examined whether these two continuous variables were related.
+    </div>
+
+    <div class="chart-wrap" id="wrap-c">
+      <svg id="svg-c" width="100%" viewBox="0 0 860 360" style="display:block"></svg>
+    </div>
+    <p style="font-size:11px;color:var(--text-faint);font-family:var(--sans);line-height:1.65;max-width:760px;margin:-10px 0 20px;">Each dot represents one person in the sample. For clarity, only some of the data from the sample of 800 people is shown here.</p>
+
+    <button class="reveal-btn" onclick="toggleFeat('feat-c',this)">What makes this a correlational study?</button>
+    <div class="feat-box" id="feat-c">
+      <div class="feat-inner">
+        <div class="feat-item"><div class="feat-num">1</div><div><strong>Two continuous variables.</strong> For each participant, the researchers obtained a value for each of the two continuous variables — hours slept the previous night and problem-solving score. These values can be plotted on a scatterplot like the one above to give us a visual representation of the relationship between the two variables.</div></div>
+        <div class="feat-item"><div class="feat-num">2</div><div><strong>No groups.</strong> Because neither of the variables in this study is categorical, participants are not being sorted into groups.</div></div>
+        <div class="feat-item"><div class="feat-num">3</div><div><strong>What we can conclude:</strong> The fact that the points on the scatterplot appear to cluster around a line suggests that sleep and problem-solving ability are correlated — that is, there appears to be a relationship between them. Because the line moves up toward the right, this is a <em>positive correlation</em> (as one variable increases, the other also increases; see Section 1.7 for more about positive and negative correlations, as well as the use of correlation coefficients to establish the strength and direction of a correlation). Because this is a correlational study, we cannot say sleep <em>causes</em> better problem-solving (see Section 1.7 for more information about why correlational designs do not allow us to infer a causal relationship).</div></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ DECISION TREE ══ -->
+  <div class="section" id="decision-tree-section">
+    <div class="sec-eyebrow">Putting It All Together</div>
+    <h2 style="color:var(--accent)">How to Identify a Research Design</h2>
+    <p class="bt">When you encounter a study, the questions below can help you work out which of the three research designs it uses. Work through them in order — each question narrows things down until you reach a conclusion.</p>
+    <div id="dt-wrap" style="margin:28px 0 0; max-width:800px;">
+      <svg id="dt-svg" width="100%" viewBox="0 0 800 440" style="display:block"></svg>
+    </div>
+    <div style="max-width:800px; margin-top:14px; display:flex; gap:20px; flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);font-family:var(--sans);">
+        <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="none" stroke="#7ed957" stroke-width="1.5"/></svg>
+        <span>Experimental</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);font-family:var(--sans);">
+        <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="none" stroke="#ffb84d" stroke-width="1.5"/></svg>
+        <span>Quasi-Experimental</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-muted);font-family:var(--sans);">
+        <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="none" stroke="#5b9eff" stroke-width="1.5"/></svg>
+        <span>Correlational</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ════════════════════════════════════
+//  QUIZ DATA  — all 5 variables are
+//  novel (not mentioned in the text)
+// ════════════════════════════════════
+const QUIZ = {
+  1: {
+    correct: 'continuous',
+    fb_c: '<strong>Correct — this is a continuous variable.</strong> The number of caffeinated drinks a person consumes can range from zero to many, and every value along that scale is meaningful. Because the answer is a quantity that varies by degree, this is a continuous variable.',
+    fb_w: '<strong>Not quite — this is a continuous variable.</strong> Think about the kind of answer this question produces: a number. That number can fall anywhere along a scale from zero upward, and the difference between 1 cup and 4 cups is meaningful. Because the answer is a quantity that varies by degree, this is a continuous variable.'
+  },
+  2: {
+    correct: 'categorical',
+    fb_c: '<strong>Correct — this is a categorical variable.</strong> This question sorts each person into a distinct group — Urban, Suburban, or Rural. Because the answer is a category label rather than a value along a scale, this is a categorical (grouping) variable.',
+    fb_w: '<strong>Not quite — this is a categorical variable.</strong> Notice that the response options are labels, not points on a scale. This question sorts each person into a distinct group — Urban, Suburban, or Rural. Because the answer is a category label rather than a quantity, this is a categorical (grouping) variable.'
+  },
+  3: {
+    correct: 'continuous',
+    fb_c: '<strong>Correct — this is a continuous variable.</strong> The number of hours spent exercising can range from zero to many, and differences in the answer are meaningful — someone who exercises 8 hours a week does considerably more than someone who exercises 1 hour. Because the answer is a quantity that varies along a scale, this is a continuous variable.',
+    fb_w: '<strong>Not quite — this is a continuous variable.</strong> The number of hours spent exercising is a quantity that can fall anywhere along a scale, and small differences are meaningful. Someone who exercises 8 hours a week does considerably more than someone who does 1. Because the answer varies by degree, this is a continuous variable.'
+  },
+  4: {
+    correct: 'categorical',
+    fb_c: '<strong>Correct — this is a categorical variable.</strong> Birth order places each person into a distinct group — Firstborn, Middle child, Youngest child, or Only child. There is no meaningful "more" or "less" between these options. Because the answer is a category label, this is a categorical (grouping) variable.',
+    fb_w: '<strong>Not quite — this is a categorical variable.</strong> Birth order places each person into a distinct group — Firstborn, Middle child, Youngest, or Only child. There is no scale here and no meaningful sense in which one category is "more" than another. Because the answer is a category label, this is a categorical (grouping) variable.'
+  },
+  5: {
+    correct: 'continuous',
+    fb_c: '<strong>Correct — this is a continuous variable.</strong> The number of text messages sent in a day can range from zero to hundreds, and differences along that scale are meaningful. Because the answer is a quantity that varies by degree, this is a continuous variable.',
+    fb_w: '<strong>Not quite — this is a continuous variable.</strong> The number of text messages sent is a quantity that can fall anywhere from zero to hundreds, and differences are meaningful — 80 messages is very different from 5. Because the answer is a quantity that varies along a scale, this is a continuous variable.'
+  }
+};
+
+let quizAnswered = 0, quizScore = 0;
+
+function answer(qNum, chosen) {
+  const qData = QUIZ[qNum];
+  const correct = qData.correct;
+  const isRight = chosen === correct;
+  quizAnswered++;
+  if (isRight) quizScore++;
+  const q = document.getElementById('qq' + qNum);
+  const fb = document.getElementById('qf' + qNum);
+  q.querySelectorAll('.q-btn').forEach(btn => {
+    btn.disabled = true;
+    const t = btn.getAttribute('data-type');
+    if      (t === chosen  &&  isRight) btn.classList.add('correct');
+    else if (t === chosen  && !isRight) btn.classList.add('wrong');
+    else if (t === correct && !isRight) btn.classList.add('missed');
+  });
+  fb.innerHTML = qData[isRight ? 'fb_c' : 'fb_w'];
+  fb.classList.add('show', isRight ? 'fc' : 'fw');
+  q.classList.add(isRight ? 'ac' : 'aw');
+  if (quizAnswered === 5) showSummary();
+}
+
+function showSummary() {
+  const notes = [
+    'The continuous/categorical distinction is worth revisiting before moving on. The key question to ask is: does the answer produce a number along a scale, or a label that places someone in a group? Keep this in mind as you work through the three research methods below.',
+    'Good effort. The distinction can be subtle — keep the key question in mind as you work through the methods below: does the answer produce a number along a scale, or a label that places someone in a group?',
+    'Good effort. The distinction can be subtle — keep the key question in mind as you work through the methods below: does the answer produce a number along a scale, or a label that places someone in a group?',
+    'Well done. The continuous/categorical distinction will serve you well as you work through the three methods below — it is one of the key things to look for when trying to identify what type of study a researcher has conducted.',
+    'Well done. The continuous/categorical distinction will serve you well as you work through the three methods below — it is one of the key things to look for when trying to identify what type of study a researcher has conducted.',
+    'Perfect score. You have a solid grasp of the distinction between continuous and categorical variables. This understanding is central to everything that follows — keep it in mind as you work through the three research methods below.'
+  ];
+  document.getElementById('quiz-score-txt').textContent = quizScore + ' / 5';
+  document.getElementById('quiz-score-note').textContent = notes[quizScore];
+  document.getElementById('quiz-summary').classList.add('show');
+}
+
+// ════════════════════════════════════
+//  STUDENT DATA
+// ════════════════════════════════════
+const STUDENTS = [
+  {name:"Maya",   sleep:4.8, score:50, note:"Works night shifts at a restaurant"},
+  {name:"Jordan", sleep:7.3, score:71, note:"Lives a 5-minute walk from campus"},
+  {name:"Priya",  sleep:8.6, score:86, note:"Strict no-phone-after-10pm rule"},
+  {name:"Alex",   sleep:6.1, score:61, note:"Commutes 90 minutes each way"},
+  {name:"Sam",    sleep:4.6, score:44, note:"Pulls all-nighters before exams"},
+  {name:"Leo",    sleep:6.9, score:63, note:"Plays intramural soccer twice a week"},
+  {name:"Zara",   sleep:9.1, score:91, note:"Meditates every morning"},
+  {name:"Marcus", sleep:5.4, score:53, note:"Newborn sibling at home"},
+  {name:"Lily",   sleep:7.8, score:88, note:"Both parents are professors"},
+  {name:"Devon",  sleep:6.7, score:68, note:"Works part-time at the library"},
+  {name:"Aisha",  sleep:7.4, score:64, note:"Lives in campus residence"},
+  {name:"Tyler",  sleep:5.2, score:48, note:"Hard to wind down at night"},
+  {name:"Sofia",  sleep:8.3, score:82, note:"Grew up without TV or social media"},
+  {name:"Kai",    sleep:6.2, score:57, note:"Cares for a younger sibling most evenings"},
+  {name:"Emma",   sleep:7.1, score:75, note:"Runs a study group for her class"},
+  {name:"Jaylen", sleep:4.4, score:41, note:"Gaming until 3 AM most nights"},
+  {name:"Nadia",  sleep:8.1, score:79, note:"Strong family routine and support"},
+  {name:"Owen",   sleep:6.6, score:70, note:"First-generation university student"},
+  {name:"Cleo",   sleep:5.6, score:52, note:"High test anxiety"},
+  {name:"Fatima", sleep:7.6, score:84, note:"Family strongly emphasizes education"},
+  {name:"River",  sleep:9.2, score:94, note:"Rarely misses a class"},
+  {name:"Grace",  sleep:5.9, score:55, note:"Works two part-time jobs"},
+  {name:"Theo",   sleep:7.2, score:67, note:"Skateboards to decompress"},
+  {name:"Amara",  sleep:8.4, score:89, note:"Keeps a meticulous planner"},
+  {name:"Ravi",   sleep:5.1, score:46, note:"Has struggled with insomnia for years"},
+];
+
+// ════════════════════════════════════
+//  AVATAR GENERATOR
+//  Style inspired by Image 2:
+//  — circular coloured background
+//  — face fills most of the circle
+//  — clothing sliver at bottom
+//  — clean flat shapes, distinct hair
+// ════════════════════════════════════
+function avatar(seed, sz=56) {
+  const bgCols  = ['#7B9FD4','#8BBBDA','#6A8FC4','#9EAFD8','#7AB5C8','#8896C8'];
+  const skins   = ['#FDBCB4','#F1A58B','#D4956A','#C68642','#8D5524','#5C3317'];
+  const hairCols= ['#1C1C1C','#3A2A1A','#8B6914','#C49A6C','#7A3520','#2C1810','#D0A060'];
+  const clothCols=['#E05A4A','#4A7FC1','#5A9E6A','#9B6BC4','#D4834A','#4AADAD','#C4A44A'];
+  const eyeCols = ['#3A2A18','#1A3A5C','#2D4A1A','#5C3A1A','#1A1A4A'];
+
+  const bg  = bgCols[seed % bgCols.length];
+  const sk  = skins[seed % skins.length];
+  const hc  = hairCols[(seed * 3) % hairCols.length];
+  const cc  = clothCols[(seed * 5) % clothCols.length];
+  const ec  = eyeCols[(seed * 7) % eyeCols.length];
+
+  const cx = sz / 2, cy = sz / 2, cr = sz / 2;  // clip circle
+  // Face sits a bit higher to allow clothing sliver below
+  const fx = sz / 2, fy = sz * 0.44, fr = sz * 0.30;
+  const ht = seed % 8;   // hair type
+  const sm = seed % 3;   // smile
+  const ft = seed % 4;   // extra feature
+
+  // Clothing: a rounded-top shape at the bottom of the circle
+  const clothY = sz * 0.76;
+  const cloth = `<ellipse cx="${cx}" cy="${sz*1.05}" rx="${sz*0.58}" ry="${sz*0.38}" fill="${cc}"/>`;
+
+  // Neck
+  const neck = `<rect x="${fx - sz*0.07}" y="${fy + fr*0.82}" width="${sz*0.14}" height="${sz*0.16}" rx="${sz*0.03}" fill="${sk}"/>`;
+
+  // Hair — drawn BEHIND face
+  let hair = '';
+  if (ht === 0) {
+    // Short/buzz — close cap
+    hair = `<ellipse cx="${fx}" cy="${fy - fr*0.55}" rx="${fr*1.05}" ry="${fr*0.58}" fill="${hc}"/>`;
+  } else if (ht === 1) {
+    // Curly crown — overlapping circles
+    const b = fr * 0.65;
+    hair = `
+      <circle cx="${fx-fr*.85}" cy="${fy-fr*.48}" r="${b}" fill="${hc}"/>
+      <circle cx="${fx-fr*.35}" cy="${fy-fr*.88}" r="${b}" fill="${hc}"/>
+      <circle cx="${fx}"         cy="${fy-fr*.96}" r="${b}" fill="${hc}"/>
+      <circle cx="${fx+fr*.35}" cy="${fy-fr*.88}" r="${b}" fill="${hc}"/>
+      <circle cx="${fx+fr*.85}" cy="${fy-fr*.48}" r="${b}" fill="${hc}"/>`;
+  } else if (ht === 2) {
+    // Afro — large circle
+    hair = `<circle cx="${fx}" cy="${fy-fr*.12}" r="${fr*1.4}" fill="${hc}"/>`;
+  } else if (ht === 3) {
+    // Long straight — top + sides
+    hair = `
+      <ellipse cx="${fx}" cy="${fy-fr*.6}" rx="${fr*1.08}" ry="${fr*0.54}" fill="${hc}"/>
+      <rect x="${fx-fr*1.1}" y="${fy-fr*.28}" width="${fr*.6}" height="${fr*1.6}" rx="${fr*.2}" fill="${hc}"/>
+      <rect x="${fx+fr*.5}"  y="${fy-fr*.28}" width="${fr*.6}" height="${fr*1.6}" rx="${fr*.2}" fill="${hc}"/>`;
+  } else if (ht === 4) {
+    // Braids — top + three columns
+    hair = `
+      <ellipse cx="${fx}" cy="${fy-fr*.6}" rx="${fr*1.06}" ry="${fr*0.52}" fill="${hc}"/>
+      <rect x="${fx-fr*.88}" y="${fy-fr*.15}" width="${fr*.36}" height="${fr*1.6}" rx="${fr*.14}" fill="${hc}"/>
+      <rect x="${fx-fr*.18}" y="${fy-fr*.15}" width="${fr*.36}" height="${fr*1.72}" rx="${fr*.14}" fill="${hc}"/>
+      <rect x="${fx+fr*.52}" y="${fy-fr*.15}" width="${fr*.36}" height="${fr*1.6}" rx="${fr*.14}" fill="${hc}"/>`;
+  } else if (ht === 5) {
+    // Ponytail
+    hair = `
+      <ellipse cx="${fx}" cy="${fy-fr*.6}" rx="${fr*1.05}" ry="${fr*0.52}" fill="${hc}"/>
+      <ellipse cx="${fx+fr*1.2}" cy="${fy-fr*.22}" rx="${fr*.3}" ry="${fr*.65}" fill="${hc}"/>`;
+  } else if (ht === 6) {
+    // Bun
+    hair = `
+      <ellipse cx="${fx}" cy="${fy-fr*.58}" rx="${fr*1.02}" ry="${fr*0.5}" fill="${hc}"/>
+      <circle cx="${fx}" cy="${fy-fr*1.12}" r="${fr*.42}" fill="${hc}"/>`;
+  } else {
+    // Wavy / medium length
+    hair = `
+      <path d="M${fx-fr*1.1} ${fy-fr*.02} Q${fx-fr*.95} ${fy-fr*1.12} ${fx} ${fy-fr*1.1} Q${fx+fr*.95} ${fy-fr*1.12} ${fx+fr*1.1} ${fy-fr*.02}" fill="${hc}"/>
+      <rect x="${fx-fr*1.12}" y="${fy-fr*.05}" width="${fr*.5}" height="${fr*1.1}" rx="${fr*.18}" fill="${hc}"/>
+      <rect x="${fx+fr*.62}"  y="${fy-fr*.05}" width="${fr*.5}" height="${fr*1.1}" rx="${fr*.18}" fill="${hc}"/>`;
+  }
+
+  // Face circle
+  const face = `<circle cx="${fx}" cy="${fy}" r="${fr}" fill="${sk}"/>`;
+
+  // Eyes
+  const ex1 = fx - fr*.28, ex2 = fx + fr*.28, ey = fy - fr*.1;
+  const er = fr*.1, ep = fr*.048;
+  const eyes = `
+    <circle cx="${ex1}" cy="${ey}" r="${er}" fill="${ec}"/>
+    <circle cx="${ex2}" cy="${ey}" r="${er}" fill="${ec}"/>
+    <circle cx="${ex1}" cy="${ey}" r="${ep}" fill="#080606"/>
+    <circle cx="${ex2}" cy="${ey}" r="${ep}" fill="#080606"/>
+    <circle cx="${ex1-fr*.022}" cy="${ey-fr*.025}" r="${fr*.024}" fill="white" opacity=".6"/>
+    <circle cx="${ex2-fr*.022}" cy="${ey-fr*.025}" r="${fr*.024}" fill="white" opacity=".6"/>`;
+
+  // Eyebrows (adds character)
+  const ebY = ey - er - fr*.08;
+  const brows = `
+    <path d="M${ex1-fr*.14} ${ebY} Q${ex1} ${ebY-fr*.06} ${ex1+fr*.14} ${ebY}" stroke="${hc}" stroke-width="${fr*.06}" fill="none" stroke-linecap="round" opacity=".7"/>
+    <path d="M${ex2-fr*.14} ${ebY} Q${ex2} ${ebY-fr*.06} ${ex2+fr*.14} ${ebY}" stroke="${hc}" stroke-width="${fr*.06}" fill="none" stroke-linecap="round" opacity=".7"/>`;
+
+  // Nose — subtle
+  const noseY = fy + fr*.14;
+  const nose = `<circle cx="${fx}" cy="${noseY}" r="${fr*.045}" fill="${sk}" stroke="#00000018" stroke-width="1"/>`;
+
+  // Mouth
+  const mx = fx, my = fy + fr*.38;
+  let mouth = '';
+  if      (sm === 0) mouth = `<path d="M${mx-fr*.25} ${my} Q${mx} ${my+fr*.2} ${mx+fr*.25} ${my}" stroke="#96504A" stroke-width="${fr*.085}" fill="none" stroke-linecap="round"/>`;
+  else if (sm === 1) mouth = `<path d="M${mx-fr*.2} ${my} Q${mx} ${my+fr*.28} ${mx+fr*.2} ${my}" stroke="#885040" stroke-width="${fr*.085}" fill="none" stroke-linecap="round"/>`;
+  else               mouth = `<line x1="${mx-fr*.18}" y1="${my+fr*.04}" x2="${mx+fr*.18}" y2="${my+fr*.04}" stroke="#907060" stroke-width="${fr*.078}" stroke-linecap="round"/>`;
+
+  // Extra features
+  let extra = '';
+  if (ft === 1) {
+    // Glasses
+    const gx1=ex1, gx2=ex2, gy=ey+fr*.02, gw=fr*.62, gh=fr*.44;
+    extra = `
+      <rect x="${gx1-gw/2}" y="${gy-gh/2}" width="${gw}" height="${gh}" rx="${fr*.12}" fill="none" stroke="#888" stroke-width="${fr*.075}"/>
+      <rect x="${gx2-gw/2}" y="${gy-gh/2}" width="${gw}" height="${gh}" rx="${fr*.12}" fill="none" stroke="#888" stroke-width="${fr*.075}"/>
+      <line x1="${gx1+gw/2}" y1="${gy}" x2="${gx2-gw/2}" y2="${gy}" stroke="#888" stroke-width="${fr*.065}"/>
+      <line x1="${gx1-gw/2}" y1="${gy}" x2="${gx1-gw/2-fr*.28}" y2="${gy-fr*.05}" stroke="#888" stroke-width="${fr*.065}"/>
+      <line x1="${gx2+gw/2}" y1="${gy}" x2="${gx2+gw/2+fr*.28}" y2="${gy-fr*.05}" stroke="#888" stroke-width="${fr*.065}"/>`;
+  } else if (ft === 2) {
+    // Freckles
+    const fy2 = fy + fr*.24;
+    extra = `
+      <circle cx="${fx-fr*.42}" cy="${fy2}"       r="${fr*.06}"  fill="#A06840" opacity=".45"/>
+      <circle cx="${fx-fr*.58}" cy="${fy2+fr*.1}"  r="${fr*.05}"  fill="#A06840" opacity=".4"/>
+      <circle cx="${fx-fr*.28}" cy="${fy2+fr*.14}" r="${fr*.045}" fill="#A06840" opacity=".35"/>
+      <circle cx="${fx+fr*.42}" cy="${fy2}"        r="${fr*.06}"  fill="#A06840" opacity=".45"/>
+      <circle cx="${fx+fr*.58}" cy="${fy2+fr*.1}"  r="${fr*.05}"  fill="#A06840" opacity=".4"/>
+      <circle cx="${fx+fr*.28}" cy="${fy2+fr*.14}" r="${fr*.045}" fill="#A06840" opacity=".35"/>`;
+  } else if (ft === 3) {
+    // Drop earrings
+    const earY = fy + fr*.1;
+    extra = `
+      <circle cx="${fx-fr*1.0}" cy="${earY}"        r="${fr*.09}"  fill="#D4A030"/>
+      <line   x1="${fx-fr*1.0}" y1="${earY+fr*.09}" x2="${fx-fr*1.0}" y2="${earY+fr*.26}" stroke="#D4A030" stroke-width="${fr*.065}"/>
+      <circle cx="${fx-fr*1.0}" cy="${earY+fr*.34}"  r="${fr*.11}"  fill="#D4A030"/>
+      <circle cx="${fx+fr*1.0}" cy="${earY}"         r="${fr*.09}"  fill="#D4A030"/>
+      <line   x1="${fx+fr*1.0}" y1="${earY+fr*.09}" x2="${fx+fr*1.0}" y2="${earY+fr*.26}" stroke="#D4A030" stroke-width="${fr*.065}"/>
+      <circle cx="${fx+fr*1.0}" cy="${earY+fr*.34}"  r="${fr*.11}"  fill="#D4A030"/>`;
+  }
+
+  return `<svg width="${sz}" height="${sz}" viewBox="0 0 ${sz} ${sz}" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="cc${seed}"><circle cx="${cx}" cy="${cy}" r="${cr}"/></clipPath></defs>
+    <g clip-path="url(#cc${seed})">
+      <circle cx="${cx}" cy="${cy}" r="${cr}" fill="${bg}"/>
+      ${cloth}${neck}${hair}${face}${brows}${eyes}${nose}${mouth}${extra}
+    </g>
+  </svg>`;
+}
+
+// ════════════════════════════════════
+//  SCATTER PLOT
+// ════════════════════════════════════
+function buildScatter() {
+  const el  = document.getElementById('svg-c');
+  const W=860, H=360, pl=70, pr=30, pt=22, pb=54;
+  const pw=W-pl-pr, ph=H-pt-pb;
+  const sMin=4.0, sMax=9.8, gMin=30, gMax=100;
+  const sx=v=>pl+(v-sMin)/(sMax-sMin)*pw;
+  const sy=v=>pt+(1-(v-gMin)/(gMax-gMin))*ph;
+  let o='';
+
+  [40,50,60,70,80,90,100].forEach(g=>{
+    const y=sy(g);
+    o+=`<line x1="${pl}" y1="${y}" x2="${pl+pw}" y2="${y}" stroke="#232a36" stroke-width="1"/>`;
+    o+=`<text x="${pl-10}" y="${y+4}" text-anchor="end" font-family="Geist Mono,monospace" font-size="11" fill="#565b66">${g}%</text>`;
+  });
+  [4.5,5.0,5.5,6.0,6.5,7.0,7.5,8.0,8.5,9.0].forEach(s=>{
+    const x=sx(s);
+    o+=`<line x1="${x}" y1="${pt}" x2="${x}" y2="${pt+ph}" stroke="#232a36" stroke-width="1"/>`;
+    o+=`<text x="${x}" y="${pt+ph+18}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="11" fill="#565b66">${s}</text>`;
+  });
+  o+=`<line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+ph}" stroke="#2f3845" stroke-width="1.5"/>`;
+  o+=`<line x1="${pl}" y1="${pt+ph}" x2="${pl+pw}" y2="${pt+ph}" stroke="#2f3845" stroke-width="1.5"/>`;
+  o+=`<text x="${pl+pw/2}" y="${H-6}" text-anchor="middle" font-family="Geist,sans-serif" font-size="12" font-weight="500" fill="#8a8f99">Hours of Sleep the Prior Night</text>`;
+  o+=`<text x="14" y="${pt+ph/2}" text-anchor="middle" font-family="Geist,sans-serif" font-size="12" font-weight="500" fill="#8a8f99" transform="rotate(-90 14 ${pt+ph/2})">Problem-Solving Score (%)</text>`;
+
+  // OLS trend line
+  const n=STUDENTS.length;
+  const mx=STUDENTS.reduce((s,d)=>s+d.sleep,0)/n;
+  const my=STUDENTS.reduce((s,d)=>s+d.score,0)/n;
+  const num=STUDENTS.reduce((s,d)=>s+(d.sleep-mx)*(d.score-my),0);
+  const den=STUDENTS.reduce((s,d)=>s+(d.sleep-mx)**2,0);
+  const m=num/den, b=my-m*mx;
+  o+=`<line x1="${sx(4.2)}" y1="${sy(m*4.2+b)}" x2="${sx(9.5)}" y2="${sy(m*9.5+b)}" stroke="#5b9eff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.28"/>`;
+
+  STUDENTS.forEach((s,i)=>{
+    const dcx=sx(s.sleep), dcy=sy(s.score);
+    o+=`<circle cx="${dcx}" cy="${dcy}" r="7"
+      fill="#5b9eff" opacity="0.72" stroke="#0a0d12" stroke-width="1.5"/>`;
+  });
+
+  el.innerHTML=o;
+}
+
+// ════════════════════════════════════
+//  GROUPED DOT CHART
+// ════════════════════════════════════
+function buildGrouped(svgId, groups, color, footNote, badge, noteLines) {
+  const el=document.getElementById(svgId);
+  // Footnote is now rendered as an HTML caption below the chart, so the SVG
+  // itself no longer needs extra height reserved for note lines.
+  const noteH = 0;
+  const W=860, H=300+noteH, pl=70, pr=38, pt=48, pb=44+noteH;
+  const ph=H-pt-pb;
+  const gMin=30, gMax=100;
+  const sy=v=>pt+(1-(v-gMin)/(gMax-gMin))*ph;
+  const cols=[210,650];
+  let o='';
+
+  el.setAttribute('viewBox',`0 0 860 ${H}`);
+
+  [40,50,60,70,80,90,100].forEach(g=>{
+    const y=sy(g);
+    o+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#232a36" stroke-width="1"/>`;
+    o+=`<text x="${pl-10}" y="${y+4}" text-anchor="end" font-family="Geist Mono,monospace" font-size="11" fill="#565b66">${g}%</text>`;
+  });
+  o+=`<line x1="${pl}" y1="${pt}" x2="${pl}" y2="${pt+ph}" stroke="#2f3845" stroke-width="1.5"/>`;
+  o+=`<text x="14" y="${pt+ph/2}" text-anchor="middle" font-family="Geist,sans-serif" font-size="12" font-weight="500" fill="#8a8f99" transform="rotate(-90 14 ${pt+ph/2})">Problem-Solving Score (%)</text>`;
+
+  const midX=(cols[0]+cols[1])/2;
+  o+=`<line x1="${midX}" y1="${pt}" x2="${midX}" y2="${pt+ph}" stroke="#2f3845" stroke-width="1" stroke-dasharray="4,4"/>`;
+
+  // Badge: coin SVG + text for experimental; null for quasi
+  if(badge){
+    const bx=midX, by=pt+ph/2;
+    // Coin icon (drawn SVG, not emoji)
+    o+=`<rect x="${bx-48}" y="${by-32}" width="96" height="64" rx="8" fill="${color}" opacity="0.07"/>`;
+    o+=`<rect x="${bx-48}" y="${by-32}" width="96" height="64" rx="8" fill="none" stroke="${color}" stroke-width="1" opacity="0.22"/>`;
+    // Coin circle
+    o+=`<circle cx="${bx}" cy="${by-10}" r="11" fill="none" stroke="${color}" stroke-width="1.6" opacity="0.9"/>`;
+    o+=`<circle cx="${bx}" cy="${by-10}" r="7.5" fill="none" stroke="${color}" stroke-width="0.8" opacity="0.4"/>`;
+    // Coin face lines (stylised)
+    o+=`<line x1="${bx-4}" y1="${by-13}" x2="${bx-4}" y2="${by-7}" stroke="${color}" stroke-width="1.2" opacity="0.6" stroke-linecap="round"/>`;
+    o+=`<path d="M${bx-4} ${by-13} Q${bx+4} ${by-13} ${bx+4} ${by-10} Q${bx+4} ${by-7} ${bx-4} ${by-7}" stroke="${color}" stroke-width="1.1" fill="none" opacity="0.6" stroke-linecap="round"/>`;
+    // Text below coin
+    o+=`<text x="${bx}" y="${by+10}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="${color}" opacity="0.9">${badge[0]}</text>`;
+    o+=`<text x="${bx}" y="${by+22}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="${color}" opacity="0.9">${badge[1]}</text>`;
+  }
+
+  groups.forEach((grp,gi)=>{
+    const cx=cols[gi];
+    o+=`<text x="${cx}" y="${pt-26}" text-anchor="middle" font-family="Fraunces,serif" font-size="16" fill="${color}">${grp.label}</text>`;
+    o+=`<text x="${cx}" y="${pt-10}" text-anchor="middle" font-family="Geist Mono,monospace" font-size="10" fill="#565b66">${grp.sub}</text>`;
+
+    grp.members.forEach((score,i)=>{
+      const jitter=Math.sin(i*13.7+gi*99)*36;
+      o+=`<circle cx="${cx+jitter}" cy="${sy(score)}" r="7" fill="${color}" opacity="0.62" stroke="#0a0d12" stroke-width="1.5"/>`;
+    });
+
+    const mean=grp.members.reduce((s,g)=>s+g,0)/grp.members.length;
+    const my=sy(mean);
+    o+=`<line x1="${cx-70}" y1="${my}" x2="${cx+70}" y2="${my}" stroke="${color}" stroke-width="2.5" opacity="0.9"/>`;
+    const lx=gi===0?cx-74:cx+74, anch=gi===0?'end':'start';
+    o+=`<text x="${lx}" y="${my+4}" text-anchor="${anch}" font-family="Geist Mono,monospace" font-size="11" fill="${color}">avg ${mean.toFixed(1)}%</text>`;
+  });
+
+  el.innerHTML=o;
+
+  // Footnote rendered as an HTML caption below the chart (so long text wraps
+  // instead of running off the SVG canvas). Matches the correlational caption.
+  const capId = svgId + '-cap';
+  let cap = document.getElementById(capId);
+  if(!cap){
+    cap = document.createElement('p');
+    cap.id = capId;
+    cap.style.cssText = 'font-size:11px;color:var(--text-faint);font-family:var(--sans);line-height:1.65;max-width:760px;margin:-10px 0 20px;';
+    const wrap = el.closest('.chart-wrap');
+    if(wrap && wrap.parentNode){ wrap.parentNode.insertBefore(cap, wrap.nextSibling); }
+  }
+  let capText = footNote;
+  if(noteLines){ capText += ' ' + noteLines.join(' '); }
+  cap.textContent = capText;
+}
+
+// ════════════════════════════════════
+//  BUILD QUASI
+//  Cutoff: <8 = short, >=8 = long
+// ════════════════════════════════════
+function buildQuasi(){
+  const short=STUDENTS.filter(s=>s.sleep<8.0).map(s=>s.score);
+  const long =STUDENTS.filter(s=>s.sleep>=8.0).map(s=>s.score);
+  buildGrouped('svg-q',[
+    {label:'Short Sleepers', sub:'UNDER 8 HRS / NIGHT', members:short},
+    {label:'Long Sleepers',  sub:'8 OR MORE HRS / NIGHT', members:long},
+  ],
+  '#ffb84d',
+  'Groups were formed by students\u2019 own existing sleep habits rather than by a researcher. Each dot represents one person in the sample. For clarity, only some of the data from the sample of 800 people is shown here.',
+  null,
+  [
+    `The short-sleeper group is larger than the long-sleeper group in this sample, reflecting the fact that most students in the study slept fewer than 8 hours per night.`
+  ]);
+}
+
+// ════════════════════════════════════
+//  BUILD EXPERIMENTAL
+// ════════════════════════════════════
+function buildExp(){
+  const rng=s=>{let x=Math.sin(s+1)*10000; return x-Math.floor(x);};
+  const ctrl=[], prog=[];
+  for(let i=0;i<15;i++){
+    const base=52+rng(i*7+1)*28;
+    ctrl.push(+Math.min(100,Math.round(base)));
+    prog.push(+Math.min(100,Math.round(base+7+rng(i*7+2)*7)));
+  }
+  buildGrouped('svg-e',[
+    {label:'Control Group',     sub:"'NORMAL' SLEEP HABITS",       members:ctrl},
+    {label:'Quality Sleep Group', sub:'8 HRS QUALITY SLEEP / NIGHT', members:prog},
+  ],
+  '#7ed957',
+  'Groups were formed by coin flip (random assignment) \u2014 each student was equally likely to be placed in either condition (group). Each dot represents one person in the sample. For clarity, only some of the data from the sample of 800 people is shown here.',
+  null,
+  null);
+}
+
+// ════════════════════════════════════
+//  REVEAL TOGGLE
+// ════════════════════════════════════
+function toggleFeat(id, btn){
+  document.getElementById(id).classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+
+// ════════════════════════════════════
+//  DECISION TREE  (two questions)
+// ════════════════════════════════════
+function buildDecisionTree() {
+  const svg = document.getElementById('dt-svg');
+  if (!svg) return;
+  const sans = 'Geist,system-ui,sans-serif';
+  const mono = 'Geist Mono,monospace';
+  const serif = 'Fraunces,Georgia,serif';
+  const qBg = '#131820', qBorder = '#2f3845', qText = '#f1ece1';
+  const faint = '#565b66';
+  const cExp = '#7ed957', cQuasi = '#ffb84d', cCorr = '#5b9eff';
+  const lineC = '#2f3845';
+
+  let o = '';
+
+  // Arrowhead marker
+  o += `<defs>
+    <marker id="ah" markerWidth="8" markerHeight="6" refX="7.5" refY="3" orient="auto">
+      <polygon points="0 0,8 3,0 6" fill="${lineC}"/>
+    </marker>
+  </defs>`;
+
+  function qBox(x, y, w, h, lines, qn) {
+    const rx = 10, bx = x - w/2, by = y - h/2;
+    let s = `<rect x="${bx}" y="${by}" width="${w}" height="${h}" rx="${rx}" fill="${qBg}" stroke="${qBorder}" stroke-width="1.5"/>`;
+    s += `<rect x="${bx+10}" y="${y-11}" width="22" height="22" rx="4" fill="#1a2029"/>`;
+    s += `<text x="${bx+21}" y="${y+1}" text-anchor="middle" dominant-baseline="central" font-family="${mono}" font-size="10" fill="${faint}">${qn}</text>`;
+    const lh = 16, totalH = lines.length * lh, startY = y - totalH/2 + lh/2;
+    lines.forEach((ln, i) => {
+      s += `<text x="${x}" y="${startY + i*lh}" text-anchor="middle" dominant-baseline="central" font-family="${sans}" font-size="13.5" font-weight="500" fill="${qText}">${ln}</text>`;
+    });
+    return s;
+  }
+
+  function outcome(cx, cy, w, h, color, label) {
+    const x = cx - w/2, y = cy - h/2;
+    let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${h/2}" fill="${color}18" stroke="${color}" stroke-width="1.5"/>`;
+    s += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-family="${serif}" font-size="15" font-weight="500" fill="${color}">${label}</text>`;
+    return s;
+  }
+
+  function line(x1,y1,x2,y2,arrow) {
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${lineC}" stroke-width="1.5"${arrow ? ' marker-end="url(#ah)"' : ''}/>`;
+  }
+  function tag(x, y, txt, anchor='middle') {
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-family="${mono}" font-size="10.5" fill="${faint}" letter-spacing="0.07em">${txt}</text>`;
+  }
+
+  // ── Layout (viewBox 800 x 440) ──
+  // Q1 centred-left top, leaving room on the right for the Correlational exit.
+  const q1cx = 340, q1cy = 60, q1w = 500, q1h = 56;
+  // Q2 centred-left middle, directly below Q1.
+  const q2cx = 340, q2cy = 250, q2w = 500, q2h = 56;
+  // Outcomes.
+  const corrCX = 705, corrCY = 270;      // Q1 NO -> far right, own band (sits below Q2's row for clear separation)
+  const expCX  = 200, expCY  = 410;      // Q2 YES -> left
+  const quasiCX= 480, quasiCY= 410;      // Q2 NO  -> right
+
+  // Q1 box
+  o += qBox(q1cx, q1cy, q1w, q1h,
+    ['Is there a categorical variable that sorts', 'participants into distinct groups?'], 'Q1');
+
+  // Q1 -> NO -> Correlational (go right, then down a little)
+  const q1right = q1cx + q1w/2;
+  o += line(q1right, q1cy, corrCX, q1cy, false);
+  o += tag(q1right + 32, q1cy - 9, 'NO');
+  o += line(corrCX, q1cy, corrCX, corrCY - 28, true);
+  o += outcome(corrCX, corrCY, 180, 44, cCorr, 'Correlational');
+
+  // Q1 -> YES -> Q2 (straight down)
+  o += line(q1cx, q1cy + q1h/2, q1cx, q2cy - q2h/2, true);
+  o += tag(q1cx + 20, q1cy + q1h/2 + 16, 'YES');
+
+  // Q2 box
+  o += qBox(q2cx, q2cy, q2w, q2h,
+    ['Did the researcher randomly assign', 'participants to those groups (e.g., coin flip)?'], 'Q2');
+
+  // Q2 -> two branches drop from the BOTTOM edge of the box.
+  // YES exits bottom-left, NO exits bottom-right; each elbows out to its outcome.
+  const q2bottom = q2cy + q2h/2;
+  const yesStubX = q2cx - 90;   // bottom-edge exit point for YES
+  const noStubX  = q2cx + 90;   // bottom-edge exit point for NO
+  const elbowY   = q2bottom + 46; // horizontal routing level below the box
+
+  // Q2 -> YES -> Experimental (drop, elbow left, drop)
+  o += line(yesStubX, q2bottom, yesStubX, elbowY, false);
+  o += line(yesStubX, elbowY, expCX, elbowY, false);
+  o += line(expCX, elbowY, expCX, expCY - 28, true);
+  o += tag(yesStubX - 24, q2bottom + 18, 'YES', 'end');
+  o += outcome(expCX, expCY, 220, 44, cExp, 'Experimental');
+
+  // Q2 -> NO -> Quasi (drop, elbow right, drop)
+  o += line(noStubX, q2bottom, noStubX, elbowY, false);
+  o += line(noStubX, elbowY, quasiCX, elbowY, false);
+  o += line(quasiCX, elbowY, quasiCX, quasiCY - 28, true);
+  o += tag(noStubX + 24, q2bottom + 18, 'NO', 'start');
+  o += outcome(quasiCX, quasiCY, 250, 44, cQuasi, 'Quasi-Experimental');
+
+  svg.innerHTML = o;
+}
+
+window.addEventListener('load',()=>{
+  buildExp();
+  buildQuasi();
+  buildScatter();
+  buildDecisionTree();
+});
+</script>
+</body>
+</html>
